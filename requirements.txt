@@ -1,0 +1,3 @@
+pyyaml
+./comm/serial-datagram/python
+./comm/simplerpc/python
