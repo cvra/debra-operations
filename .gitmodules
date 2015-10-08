@@ -1,0 +1,9 @@
+[submodule "comm/simplerpc"]
+	path = comm/simplerpc
+	url = https://github.com/cvra/simplerpc.git
+[submodule "comm/serial-datagram"]
+	path = comm/serial-datagram
+	url = https://github.com/cvra/serial-datagram.git
+[submodule "control/actuator-control-interface"]
+	path = control/actuator-control-interface
+	url = https://github.com/cvra/actuator-control-interface.git
