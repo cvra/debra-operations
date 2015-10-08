@@ -7,3 +7,9 @@
 [submodule "control/actuator-control-interface"]
 	path = control/actuator-control-interface
 	url = https://github.com/cvra/actuator-control-interface.git
+[submodule "bus/master-firmware"]
+	path = bus/master-firmware
+	url = https://github.com/cvra/master-firmware.git
+[submodule "bus/motor-control-firmware"]
+	path = bus/motor-control-firmware
+	url = https://github.com/cvra/motor-control-firmware.git
