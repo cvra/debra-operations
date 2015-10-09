@@ -24,6 +24,19 @@ def create_actuator(target, name):
     """
     return cvra_rpc.service_call.call(target, 'actuator_create_driver', [name])
 
+def config_split(config):
+    """
+    Splits a config dict into smaller chunks.
+    This helps to avoid sending big config files.
+    """
+    split = []
+    if "actuator" in config:
+        for name in config["actuator"]:
+            split.append({"actuator": {name: config["actuator"][name]}})
+        del(config["actuator"])
+
+    split.append(config)
+    return split
 
 def send_config_file(destination, config_file):
     config = yaml.load(config_file)
@@ -33,9 +46,10 @@ def send_config_file(destination, config_file):
             print("Creating actuator {}".format(name))
             create_actuator(destination, name)
 
-    errors = cvra_rpc.service_call.call(destination, 'config_update', [config])
-    for key, error in errors:
-        logging.warning("Error for key '{}': {}".format(key, error))
+    for config in config_split(config):
+        errors = cvra_rpc.service_call.call(destination, 'config_update', [config])
+        for key, error in errors:
+            logging.warning("Error for key '{}': {}".format(key, error))
 
 
 def main():
