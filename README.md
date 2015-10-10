@@ -8,6 +8,18 @@ source setup_env.sh
 To leave the virtual environment: `deactivate`
 
 
+## Start ZeroMQ nodes
+
+First start the message forwarder:
+```
+python comm/message_forwarder.py
+```
+
+Then start the node of the master-board:
+```
+python comm/bus_master_node.py
+```
+
 ## Example of single actuator control
 You need to have an IP `192.168.3.0/24`.
 
