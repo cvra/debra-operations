@@ -1,8 +1,16 @@
 # debra-operations
 
 ## Setup and/or start virtual environment
+
+(_This only works in fish shell_)
+
 ```
 source setup_env.sh
+```
+
+For some tools (for example graphing) you need additional packages. In this case instead of the above command use:
+```
+source setup_dev_env.sh
 ```
 
 To leave the virtual environment: `deactivate`
