@@ -59,16 +59,16 @@ actuator:
                 ilimit: 100.
 
             velocity:
-                kp: 0.2
-                ki: 0.8
+                kp: 8
+                ki: 1
                 kd: 0.
-                ilimit: 0.13
+                ilimit: 0.5
             position:
-                kp: 6
-                ki: 1.
-                kd: 2.
+                kp: 12
+                ki: 0.
+                kd: 0.
 
             low_batt_th: 12
-            acceleration_limit: 100.
-            velocity_limit: 1.
-            torque_limit: 1
+            acceleration_limit: 20.
+            velocity_limit: 5.
+            torque_limit: 3
