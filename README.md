@@ -32,3 +32,12 @@ Send setpoint:
 ```
 python control/actuator-control-interface/send_setpoint_test.py -a left-wrist -p 192.168.3.20 3.14
 ```
+
+## Plot message (experimental)
+
+First start the ZeroMQ nodes.
+
+Example: plot the postition and velocity of the left-wrist actuator
+```
+python tools/message_graph.py position:left-wrist.0 position:left-wrist.1
+```
