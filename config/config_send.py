@@ -1,11 +1,23 @@
 #!/usr/bin/env python3
-import cvra_rpc.service_call
+import zmq
+import msgpack
 import yaml
 import argparse
 import logging
 import os.path
 import time
 
+
+def zeromq_call(target, service, arg):
+    context = zmq.Context()
+    socket = context.socket(zmq.REQ)
+    socket.connect(target)
+    socket.send(msgpack.packb([service, arg]))
+    res = msgpack.unpackb(socket.recv(), encoding='utf8')
+    if res[0] == 'ok':
+        return res[1]
+    else:
+        raise Exception('call failed')
 
 def keys_to_str(to_convert):
     """
@@ -22,7 +34,7 @@ def create_actuator(target, name):
     """
     Creates the actuator to receive the config.
     """
-    return cvra_rpc.service_call.call(target, 'actuator_create_driver', [name])
+    return zeromq_call(target, 'actuator_create_driver', name)
 
 def config_split(config):
     """
@@ -47,7 +59,7 @@ def send_config_file(destination, config_file):
             create_actuator(destination, name)
 
     for config in config_split(config):
-        errors = cvra_rpc.service_call.call(destination, 'config_update', [config])
+        errors = zeromq_call(destination, 'config_update', config)
         for key, error in errors:
             logging.warning("Error for key '{}': {}".format(key, error))
 
@@ -55,18 +67,13 @@ def send_config_file(destination, config_file):
 def main():
     parser = argparse.ArgumentParser("Sends the robot config to the master board.")
     parser.add_argument("config", help="YAML file containing robot config.")
-    parser.add_argument("master_ip", help="IP address and port of the master board (host:port format).")
+    parser.add_argument("host", help="ZeroMQ address of the bus master node")
     parser.add_argument("-w", "--watch",
                         help="Watch config file for changes.",
                         action="store_true")
     args = parser.parse_args()
 
-    try:
-        host, port = args.master_ip.split(":")
-    except ValueError:
-        host, port = args.master_ip, 20001
-
-    send_config_file((host, port), open(args.config))
+    send_config_file(args.host, open(args.config))
 
     if args.watch:
         print("> watching for file changes...")
@@ -81,7 +88,7 @@ def main():
 
                 if mtime != old_mtime:
                     old_mtime = mtime
-                    send_config_file((host, port), open(args.config))
+                    send_config_file(args.host, open(args.config))
 
                 time.sleep(0.1)
             except KeyboardInterrupt:

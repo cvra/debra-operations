@@ -33,7 +33,7 @@ You need to have an IP `192.168.3.0/24`.
 
 Send config:
 ```
-python config/config_send.py config/config-left-wrist.yaml 192.168.3.20
+python config/config_send.py config/config-left-wrist.yaml ipc://ipc/bus_master_server
 ```
 
 Send setpoint:

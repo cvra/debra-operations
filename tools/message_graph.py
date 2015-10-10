@@ -135,7 +135,7 @@ def main():
                         if val is not None:
                             plot.lines[idx].updateData(val)
 
-    rcv_thread = DatagramRcv("ipc:///source", args.var)
+    rcv_thread = DatagramRcv("ipc://ipc/source", args.var)
     rcv_thread.start()
 
     signal.signal(signal.SIGINT, signal.SIG_DFL)  # to kill on ctl-C
