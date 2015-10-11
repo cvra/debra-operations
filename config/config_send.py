@@ -59,9 +59,9 @@ def send_config_file(destination, config_file):
             create_actuator(destination, name)
 
     for config in config_split(config):
-        errors = zeromq_call(destination, 'config_update', config)
-        for key, error in errors:
-            logging.warning("Error for key '{}': {}".format(key, error))
+        ret = zeromq_call(destination, 'config_update', config)
+        if ret is not None:
+            logging.warning(ret)
 
 
 def main():
