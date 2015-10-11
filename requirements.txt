@@ -1,3 +1,4 @@
+nose
 msgpack-python
 zmq
 pyyaml
