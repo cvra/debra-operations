@@ -5,6 +5,9 @@ import socketserver
 import msgpack
 import zmq
 
+
+MESSAGE_FILTER = ('wheelbase_waypoint', ...)
+
 MASTER_BOARD_STREAM_ADDR = ('0.0.0.0', 20042)
 MASTER_BOARD_SERVICE_ADDR = ('192.168.3.20', 20001)
 MASTER_BOARD_MSG_ADDR = ('192.168.3.20', 20000)
@@ -40,6 +43,7 @@ service_call_thd.start()
 
 
 def publish_msg_to_zmq_cb(todo, msg, args):
+    # print('receiving:', msg, args)
     buf = msgpack.packb(msg) + msgpack.packb(args)
     msg_pub_sock.send(buf)
 
@@ -58,5 +62,6 @@ while True:
     unpacker = msgpack.Unpacker(encoding='utf8')
     unpacker.feed(buf)
     msg, arg = tuple(unpacker)
-    print(msg, arg)
-    cvra_rpc.message.send(MASTER_BOARD_MSG_ADDR, msg, arg)
+    if msg in MESSAGE_FILTER:
+        # print('sending:', msg, arg)
+        cvra_rpc.message.send(MASTER_BOARD_MSG_ADDR, msg, arg)
