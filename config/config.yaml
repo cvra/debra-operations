@@ -1,19 +1,31 @@
 master:
     odometry:
         wheelbase: 0.194
-        radius_left: 0.016
+        radius_left: -0.016
         radius_right: 0.016
 
     tracy:
         damping: 0.7
         g: 60.
 
+    waypoint_ctrl:
+        heading:
+            kp: 10.
+            ki: 0.
+            kd: 0.
+            ilimit: 50.
+        distance:
+            kp: 10.
+            ki: 0.
+            kd: 0.
+            ilimit: 50.
+
 actuator:
     left-wheel:
         stream:
             # Encoder position is needed for odometry
             encoder_pos: 100
-            position_pid: 100
+            position_pid: 0
         motor:
             mode: 2
             motor_encoder_steps_per_revolution: 4096
@@ -47,7 +59,7 @@ actuator:
        stream:
            # Encoder position is needed for odometry
            encoder_pos: 100
-           position_pid: 100
+           position_pid: 0
 
        motor:
            mode: 2
