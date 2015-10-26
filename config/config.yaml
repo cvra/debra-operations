@@ -10,12 +10,12 @@ master:
 
     waypoint_ctrl:
         heading:
-            kp: 10.
+            kp: 20.
             ki: 0.
-            kd: 0.
+            kd: 0.0
             ilimit: 50.
         distance:
-            kp: 10.
+            kp: 100.
             ki: 0.
             kd: 0.
             ilimit: 50.
@@ -25,6 +25,7 @@ actuator:
         stream:
             # Encoder position is needed for odometry
             encoder_pos: 100
+            velocity_pid: 0
             position_pid: 0
         motor:
             mode: 2
