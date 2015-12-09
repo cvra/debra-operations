@@ -13,3 +13,6 @@
 [submodule "bus/motor-control-firmware"]
 	path = bus/motor-control-firmware
 	url = https://github.com/cvra/motor-control-firmware.git
+[submodule "drivers/tim561_lidar_driver"]
+	path = drivers/tim561_lidar_driver
+	url = https://github.com/cvra/tim561_lidar_driver.git
