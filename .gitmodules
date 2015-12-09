@@ -16,3 +16,6 @@
 [submodule "drivers/tim561_lidar_driver"]
 	path = drivers/tim561_lidar_driver
 	url = https://github.com/cvra/tim561_lidar_driver.git
+[submodule "comm/zmqmsgbus"]
+	path = comm/zmqmsgbus
+	url = https://github.com/cvra/zmqmsgbus.git
