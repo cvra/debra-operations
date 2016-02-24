@@ -1,0 +1,38 @@
+
+actuator:
+    foobar2000:
+        stream:
+            current_pid: 0
+            velocity_pid: 0
+            position_pid: 0
+            motor_pos: 0
+            index: 0
+        motor:
+            # motor: 1524E012SR IE-512
+            mode: 2 # periodic
+            motor_encoder_steps_per_revolution: 2048
+            # transmission: motor: 1/76
+            transmission_ratio_p: 1
+            transmission_ratio_q: 76
+            torque_constant: 0.0115 # Nm/A
+        control:
+            current:
+                kp: 3.
+                ki: 500.
+                kd: 0.
+                ilimit: 100.
+
+            velocity:
+                kp: 0.1
+                ki: 0.5
+                kd: 0.
+                ilimit: 0.13
+            position:
+                kp: 0.1
+                ki: 0.01
+                kd: 0
+
+            low_batt_th: 12
+            acceleration_limit: 100.
+            velocity_limit: 8
+            torque_limit: 1.3
