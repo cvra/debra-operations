@@ -16,11 +16,17 @@ source setup_dev_env.sh
 To leave the virtual environment: `deactivate`
 
 
+### Use PyQT on OSX
+```
+brew install pyqt --with-python3
+virtualenv --python=python3 --system-site-packages env
+```
+
 ## Start ZeroMQ nodes
 
-First start the message forwarder:
+First start the message bus:
 ```
-python comm/message_forwarder.py
+python -m zmqmsgbus.tools.bus
 ```
 
 Then start the node of the master-board:

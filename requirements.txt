@@ -4,3 +4,6 @@ zmq
 pyyaml
 ./comm/serial-datagram/python
 ./comm/simplerpc/python
+./comm/zmqmsgbus
+./drivers/tim561_lidar_driver
+./control/actuator-control-interface
