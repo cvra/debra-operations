@@ -55,3 +55,10 @@ Example: plot the postition and velocity of the left-wrist actuator
 ```
 python tools/message_graph.py position:left-wrist.0 position:left-wrist.1
 ```
+
+## Network Setup
+
+The master-board is on 192.168.3.20.
+
+If you want to run the software-stack on your PC you should have the IP 192.168.3.1 because the master-board uses this address as ntp time server.
+Also make sure your `restrict` config (found under `/private/etc/ntp-restrict.conf` on OS X) does not include `noquery`.
