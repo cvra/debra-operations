@@ -74,6 +74,12 @@ def variable_path_extract_value(variable, data):
                     data = data[int(idx)]
                 else:
                     return None
+        elif var_key == '': # hotfix for array only topics
+            for idx in arr_var:
+                if (int(idx) < len(data)):
+                    data = data[int(idx)]
+                else:
+                    return None
         else:
             return None
     try:
