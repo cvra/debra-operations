@@ -1,7 +1,7 @@
 master:
     odometry:
         wheelbase: 0.194
-        radius_left: -0.016
+        radius_left:  0.016
         radius_right: 0.016
 
     tracy:
@@ -10,12 +10,12 @@ master:
 
     waypoint_ctrl:
         heading:
-            kp: 20.
+            kp: 10.
             ki: 0.
-            kd: 0.0
+            kd: 0
             ilimit: 50.
         distance:
-            kp: 100.
+            kp: 30.
             ki: 0.
             kd: 0.
             ilimit: 50.
