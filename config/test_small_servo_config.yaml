@@ -1,0 +1,31 @@
+actuator:
+    test-small-servo:
+        stream:
+            current_pid: 0
+            velocity_pid: 0
+            position_pid: 0
+        motor:
+            mode: 5
+            potentiometer_gain: 3.5
+            torque_constant: 1. # Nm/A
+        control:
+            current:
+                kp: 2.
+                ki: 200.
+                kd: 0.
+                ilimit: 50.
+            velocity:
+                kp: 0.5
+                ki: 20.
+                kd: 0.
+                ilimit: 50.
+            position:
+                kp: 10.
+                ki: 0
+                kd: 0.4
+                ilimit: 100
+
+            low_batt_th: 5.
+            acceleration_limit: 50.
+            velocity_limit: 20.
+            torque_limit: 0.2
