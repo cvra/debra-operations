@@ -6,10 +6,10 @@
 '''
 
 import socketserver, socket, collections, math, json
+import threading
 import numpy as np
 import zmqmsgbus
 import struct
-
 import pdb
 
 header = {'TypeOfCommand': 'sSN',
@@ -25,28 +25,46 @@ header = {'TypeOfCommand': 'sSN',
           'TimeSinceStartup': 195076021,
           'TimeOfTransmission': 195080325}
 
-class MyUDPHandler(socketserver.BaseRequestHandler):
+class MyUDPHandler_scan(socketserver.BaseRequestHandler):
 
     def handle(self):
         data = self.request[0]
         socket = self.request[1]
 
-        print('Datagram received, len = '+str(len(data)))
+        #©print('Datagram received, len = '+str(len(data)))
 
         count = len(data) // struct.calcsize('f')
         data = struct.unpack('f' * count, data)
 
-        header['Data'] = data
+        header['Data'] = data[3:]
         node.publish('/lidar/scan', header)
 
+class MyUDPHandler_position(socketserver.BaseRequestHandler):
+
+    def handle(self):
+        data = self.request[0]
+        socket = self.request[1]
+
+        #print('Datagram received, len = '+str(len(data)))
+
+        count = len(data) // struct.calcsize('f')
+        data = struct.unpack('f' * count, data)
+
+        pos = list(data[:2])
+        pos.append(2 * np.arcsin(data[5]) * np.sign(data[6]))
+        node.publish('/odometry/position', pos)
 
 if __name__ == "__main__":
     bus = zmqmsgbus.Bus(sub_addr='ipc://ipc/source',
                         pub_addr='ipc://ipc/sink')
     node = zmqmsgbus.Node(bus)
 
-    HOST, PORT = "localhost", 9999
-    server = socketserver.UDPServer((HOST, PORT), MyUDPHandler)
-    server.socket.setsockopt( socket.SOL_SOCKET, socket.SO_RCVBUF, 64000)
-    server.serve_forever()
+    HOST, PORT = "0.0.0.0", 9999
+    server_scan = socketserver.UDPServer((HOST, PORT), MyUDPHandler_scan)
+    server_scan.socket.setsockopt( socket.SOL_SOCKET, socket.SO_RCVBUF, 64000)
+    threading.Thread(target=server_scan.serve_forever, daemon=True).start()
 
+    HOST, PORT = "0.0.0.0", 9998
+    server_pos = socketserver.UDPServer((HOST, PORT), MyUDPHandler_position)
+    server_pos.socket.setsockopt( socket.SOL_SOCKET, socket.SO_RCVBUF, 64000)
+    server_pos.serve_forever()
