@@ -1,9 +1,9 @@
 actuator:
-    test-servo:
+    test-small-servo:
         stream:
             current_pid: 0
             velocity_pid: 0
-            position_pid: 100
+            position_pid: 0
         motor:
             mode: 5
             potentiometer_gain: 3.5
@@ -26,6 +26,6 @@ actuator:
                 ilimit: 100
 
             low_batt_th: 5.
-            acceleration_limit: 10.
-            velocity_limit: 10.
-            torque_limit: 0.1
+            acceleration_limit: 50.
+            velocity_limit: 20.
+            torque_limit: 0.2
