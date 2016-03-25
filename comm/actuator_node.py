@@ -31,28 +31,28 @@ def update_voltage(arg):
     if len(arg) != 2:
         return False
     global pub
-    pub.update_actuator(arg[0], VoltageSetpoint(arg[1]))
+    pub.update_actuator(arg[0], VoltageSetpoint(float(arg[1])))
     return True
 
 def update_position(arg):
     if len(arg) != 2:
         return False
     global pub
-    pub.update_actuator(arg[0], PositionSetpoint(arg[1]))
+    pub.update_actuator(arg[0], PositionSetpoint(float(arg[1])))
     return True
 
 def update_velocity(arg):
     if len(arg) != 2:
         return False
     global pub
-    pub.update_actuator(arg[0], VelocitySetpoint(arg[1]))
+    pub.update_actuator(arg[0], VelocitySetpoint(float(arg[1])))
     return True
 
 def update_torque(arg):
     if len(arg) != 2:
         return False
     global pub
-    pub.update_actuator(arg[0], TorqueSetpoint(arg[1]))
+    pub.update_actuator(arg[0], TorqueSetpoint(float(arg[1])))
     return True
 
 # format: [name, [start, dt, [[pos, vel, acc, torque], [point], ...]]]
@@ -64,10 +64,10 @@ def update_trajectory(arg):
     start = traj[0]
     dt = traj[1]
     setpoints = traj[2]
-    points = [TrajectoryPoint(position=p[0],
-                              speed=p[1],
-                              acceleration=p[2],
-                              torque=p[3])
+    points = [TrajectoryPoint(position=float(p[0]),
+                              speed=float(p[1]),
+                              acceleration=float(p[2]),
+                              torque=float(p[3]))
               for p in setpoints]
     global pub
     pub.update_actuator(arg[0], Trajectory(start=start, dt=dt, points=points))
