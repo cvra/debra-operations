@@ -1,20 +1,23 @@
 {
-    "Message Forwarder": {
-        "command": ["python", "comm/message_forwarder.py"],
+    "Bus": {
+        "command": ["python", "-mzmqmsgbus.tools.bus"],
         "restart": true
     },
     "Master Node": {
         "command": ["python", "comm/bus_master_node.py"],
-        "depends": ["Message Forwarder"],
+        "depends": ["Bus"],
         "restart": true
     },
     "Master Node Parameters": {
         "command": ["python", "config/config_send.py",
                     "-w",
-                    "config/config-left-wrist.yaml",
-                    "ipc://ipc/bus_master_server"],
+                    "config/config.yaml"],
         "depends": ["Master Node"],
-        "delay": 1,
         "dependency forces restart": true
+    },
+    "Actuator Node": {
+        "command": ["python", "comm/actuator_node.py"],
+        "depends": ["Bus"],
+        "restart": true
     }
 }
