@@ -1,5 +1,6 @@
 import subprocess
 import json
+import argparse
 import threading
 import time
 
@@ -28,8 +29,12 @@ dependency forces "restart":
     restarts, even if it already exited
 """
 
+parser = argparse.ArgumentParser("CVRA process launcher.")
+parser.add_argument("config", default='launcher.json', nargs='?',
+                    help="json file containing launch config.")
+args = parser.parse_args()
 
-services = json.load(open('launcher.json'))
+services = json.load(open(args.config))
 # print(services)
 
 services_running = {name: False for name in services}
