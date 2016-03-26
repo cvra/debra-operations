@@ -4,64 +4,43 @@ import threading
 import socketserver
 import msgpack
 import zmq
+import zmqmsgbus
+import time
 
-
-MESSAGE_FILTER = ('wheelbase_waypoint', ...)
+MESSAGE_FILTER = ['wheelbase_waypoint']
+SERVICE_FILTER = ['config_update', 'actuator_create_driver']
 
 MASTER_BOARD_STREAM_ADDR = ('0.0.0.0', 20042)
 MASTER_BOARD_SERVICE_ADDR = ('192.168.3.20', 20001)
 MASTER_BOARD_MSG_ADDR = ('192.168.3.20', 20000)
 
-context = zmq.Context()
+bus = zmqmsgbus.Bus(sub_addr='ipc://ipc/source',
+                    pub_addr='ipc://ipc/sink')
+node = zmqmsgbus.Node(bus)
 
-msg_pub_sock = context.socket(zmq.PUB)
-# msg_pub_sock.connect("tcp://localhost:13370")
-msg_pub_sock.connect("ipc://ipc/sink")
-
-msg_sub_sock = context.socket(zmq.SUB)
-# msg_sub_sock.connect("tcp://localhost:13371")
-msg_sub_sock.connect("ipc://ipc/source")
-
-call_handler = context.socket(zmq.REP)
-call_handler.bind("ipc://ipc/bus_master_server")
-call_handler.bind("tcp://*:5555")
-
-
-def handle_service_calls():
-    while True:
-        buf = call_handler.recv()
-        name, content = msgpack.unpackb(buf, encoding='ascii')
-
-        res = ['ok', cvra_rpc.service_call.call(MASTER_BOARD_SERVICE_ADDR, name, content)]
-
-        call_handler.send(msgpack.packb(res))
-
-service_call_thd = threading.Thread(target=handle_service_calls)
-service_call_thd.daemon = True
-service_call_thd.start()
-
-
+def message_handler_cb(topic, msg):
+    cvra_rpc.message.send(MASTER_BOARD_MSG_ADDR, topic, msg)
 
 def publish_msg_to_zmq_cb(todo, msg, args):
     # print('receiving:', msg, args)
-    buf = msgpack.packb(msg) + msgpack.packb(args)
-    msg_pub_sock.send(buf)
+    global node
+    node.publish(msg, args)
 
+# service calls zmq -> cvra_rpc
+for service in SERVICE_FILTER:
+    node.register_service('/actuator/' + service,
+                          lambda msg: cvra_rpc.message.send(MASTER_BOARD_MSG_ADDR, service, msg))
+
+# messages zmq -> cvra_rpc
+for topic in MESSAGE_FILTER:
+    node.register_message_handler(topic, message_handler_cb)
+
+# stream cvra_rpc -> zmq
 RequestHandler = cvra_rpc.message.create_request_handler({}, publish_msg_to_zmq_cb)
 msg_server = socketserver.UDPServer(MASTER_BOARD_STREAM_ADDR, RequestHandler)
 msg_pub_thd = threading.Thread(target=msg_server.serve_forever)
 msg_pub_thd.daemon = True
 msg_pub_thd.start()
 
-
-ANY_TOPIC = b''
-msg_sub_sock.setsockopt(zmq.SUBSCRIBE, ANY_TOPIC)
-
 while True:
-    buf = msg_sub_sock.recv()
-    unpacker = msgpack.Unpacker(encoding='utf8')
-    unpacker.feed(buf)
-    msg, arg = tuple(unpacker)
-    if msg in MESSAGE_FILTER:
-        # print('sending:', msg, arg)
-        cvra_rpc.message.send(MASTER_BOARD_MSG_ADDR, msg, arg)
+    time.sleep(1)
