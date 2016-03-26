@@ -29,7 +29,7 @@ def publish_msg_to_zmq_cb(todo, msg, args):
 # service calls zmq -> cvra_rpc
 for service in SERVICE_FILTER:
     node.register_service('/actuator/' + service,
-                          lambda msg: cvra_rpc.message.send(MASTER_BOARD_MSG_ADDR, service, msg))
+                          lambda msg, service=service: cvra_rpc.service_call.call(MASTER_BOARD_SERVICE_ADDR, service, msg))
 
 # messages zmq -> cvra_rpc
 for topic in MESSAGE_FILTER:
