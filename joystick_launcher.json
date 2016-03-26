@@ -1,0 +1,11 @@
+{
+    "Joystick": {
+        "command": ["python2", "tools/joystick.py"],
+        "restart": false
+    },
+    "Joystick Publisher": {
+        "command": ["python", "tools/joystick_pub.py"],
+        "depends": ["Joystick"],
+        "restart": false
+    }
+}
