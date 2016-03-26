@@ -1,0 +1,20 @@
+{
+    "Message Forwarder": {
+        "command": ["python", "comm/message_forwarder.py"],
+        "restart": true
+    },
+    "Master Node": {
+        "command": ["python", "comm/bus_master_node.py"],
+        "depends": ["Message Forwarder"],
+        "restart": true
+    },
+    "Master Node Parameters": {
+        "command": ["python", "config/config_send.py",
+                    "-w",
+                    "config/config-left-wrist.yaml",
+                    "ipc://ipc/bus_master_server"],
+        "depends": ["Master Node"],
+        "delay": 1,
+        "dependency forces restart": true
+    }
+}
