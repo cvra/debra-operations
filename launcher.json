@@ -1,0 +1,23 @@
+{
+    "Bus": {
+        "command": ["python", "-mzmqmsgbus.tools.bus"],
+        "restart": true
+    },
+    "Master Node": {
+        "command": ["python", "comm/bus_master_node.py"],
+        "depends": ["Bus"],
+        "restart": true
+    },
+    "Master Node Parameters": {
+        "command": ["python", "config/config_send.py",
+                    "-w",
+                    "config/config.yaml"],
+        "depends": ["Master Node"],
+        "dependency forces restart": true
+    },
+    "Actuator Node": {
+        "command": ["python", "comm/actuator_node.py"],
+        "depends": ["Bus"],
+        "restart": true
+    }
+}

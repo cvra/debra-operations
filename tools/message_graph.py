@@ -4,7 +4,7 @@ import collections
 import argparse
 import sys
 import signal
-import zmq
+import zmqmsgbus
 import msgpack
 
 
@@ -120,19 +120,14 @@ def main():
             super(DatagramRcv, self).__init__()
 
         def run(self):
-            context = zmq.Context()
-            socket = context.socket(zmq.SUB)
-            socket.connect(self.remote)
+            bus = zmqmsgbus.Bus(sub_addr=self.remote)
 
             for entry in self.variables:
                 topic, var = entry.split(':')
-                socket.setsockopt(zmq.SUBSCRIBE, msgpack.packb(topic))
+                bus.subscribe(topic)
 
             while True:
-                buf = socket.recv()
-                unpacker = msgpack.Unpacker(encoding='ascii')
-                unpacker.feed(buf)
-                topic, data = tuple(unpacker)
+                topic, data = bus.recv()
                 print(topic, data)
                 for idx, var in enumerate(self.variables):
                     var_topic, var_path = var.split(':')
