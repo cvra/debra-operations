@@ -28,8 +28,9 @@ delta_t = 0.05
 tp = trajectory.compute_trajectory(traj, actuator_limits, 1, delta_t, v_limit=20)
 
 # [[pos, vel, acc, torque], [point], ...]
-shoulder =
-elbow =
+(shoulder, elbow) = zip(*[[x for x in zip(p, v, a)] for (p, v, a) in tp]) #zip magic
+shoulder = [(*x, 0) for x in shoulder]
+elbow = [(*x, 0) for x in elbow]
 
 start = time.time()
 res = node.call('/actuator/trajectory', ['right-shoulder', [start, delta_t, shoulder]])
