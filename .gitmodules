@@ -19,3 +19,6 @@
 [submodule "comm/zmqmsgbus"]
 	path = comm/zmqmsgbus
 	url = https://github.com/cvra/zmqmsgbus.git
+[submodule "control/arm-trajectories"]
+	path = control/arm-trajectories
+	url = https://github.com/cvra/arm-trajectories.git

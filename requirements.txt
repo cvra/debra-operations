@@ -1,3 +1,6 @@
+numpy
+sympy
+scipy
 nose
 msgpack-python
 zmq
@@ -7,3 +10,4 @@ pyyaml
 ./comm/zmqmsgbus
 ./drivers/tim561_lidar_driver
 ./control/actuator-control-interface
+./control/arm-trajectories
