@@ -65,7 +65,7 @@ def update_trajectory(arg):
     dt = traj[1]
     setpoints = traj[2]
     points = [TrajectoryPoint(position=float(p[0]),
-                              speed=float(p[1]),
+                              velocity=float(p[1]),
                               acceleration=float(p[2]),
                               torque=float(p[3]))
               for p in setpoints]
