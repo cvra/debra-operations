@@ -7,3 +7,4 @@ pyyaml
 ./comm/zmqmsgbus
 ./drivers/tim561_lidar_driver
 ./control/actuator-control-interface
+./bus/CAN-USB-dongle-fw/python
