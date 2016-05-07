@@ -19,3 +19,6 @@
 [submodule "comm/zmqmsgbus"]
 	path = comm/zmqmsgbus
 	url = https://github.com/cvra/zmqmsgbus.git
+[submodule "bus/CAN-USB-dongle-fw"]
+	path = bus/CAN-USB-dongle-fw
+	url = https://github.com/cvra/CAN-USB-dongle-fw.git
