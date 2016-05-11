@@ -17,12 +17,10 @@ class RobotPose:
     def heading_to(self, target):
         return math.atan2(target.y - self.y, target.x - self.x)
 
-    @classmethod
-    def get(cls):
-        global pose_x
-        global pose_y
-        global pose_theta
-        return RobotPose(pose_x, pose_y, pose_theta)
+    def update(self, x, y, theta):
+        self.x = x
+        self.y = y
+        self.theta = theta
 
 def periodic_error(angle):
     angle = math.fmod(angle, 2*math.pi)
@@ -55,41 +53,36 @@ class PID:
         self.previous_error = error
         return output
 
-WAYPOINTS_FREQUENCY = 50 # [Hz]
-WAYPOINTS_MIN_DISTANCE_ERROR = 10e-3 # [m]
-WAYPOINTS_MAX_HEADING_ERROR = 0.2
-
 class WayPoint:
     def __init__(self):
-        global WAYPOINTS_FREQUENCY
-        self.heading_pid = PID(10,0,0,50,WAYPOINTS_FREQUENCY)
-        self.distance_pid = PID(1,0,0,50,WAYPOINTS_FREQUENCY)
-        self.target = None
+        self.frequency = 50 # [Hz]
+        self.min_distance_error = 10e-3 # [m]
+        self.max_heading_error = 0.2
+        self.waypoints_speed = 4
+        self.heading_pid = PID(kp=5,ki=0,kd=0.1,ilimit=0,self.frequency)
+        self.distance_pid = PID(kp=250,ki=0,kd=0,ilimit=0,self.frequency)
 
-    def set_target(self, target):
-        self.target = target
-
-    def process(self, pose):
-        if self.target is None:
+    def process(self, pose, target):
+        if target is None:
             return [0, 0]
-        distance_to_wp = pose.distance_to(self.target)
+        distance_to_wp = pose.distance_to(target)
         heading_error = 0
         distance_error = 0
 
-        global WAYPOINTS_MIN_DISTANCE_ERROR
-        if distance_to_wp > WAYPOINTS_MIN_DISTANCE_ERROR:
-            heading_to_wp = pose.heading_to(self.target)
+        if distance_to_wp > self.min_distance_error:
+            heading_to_wp = pose.heading_to(target)
             heading_error = periodic_error(pose.theta - heading_to_wp)
-            global WAYPOINTS_MAX_HEADING_ERROR
-            if heading_error < WAYPOINTS_MAX_HEADING_ERROR:
+            if heading_error < self.max_heading_error:
                 # distance to the waypoint projected onto the heading error
-                distance_error = -math.cos(heading_error) * distance_to_wp
+                next_setpoint =  self.waypoints_speed / self.frequency
+                distance_error = -math.cos(heading_error) * min(next_setpoint, distance_to_wp)
         else:
             # arrived at taget; turn to target heading
-            heading_error = periodic_error(pose.theta - self.target.theta)
+            heading_error = periodic_error(pose.theta - target.theta)
 
         head_ctrl = self.heading_pid.process(heading_error)
-        dist_ctrl = self.distance_pid.process(distance_error)
+        # dist_ctrl = self.distance_pid.process(distance_error)
+        dist_ctrl = -250*distance_error
         v_left = dist_ctrl - head_ctrl
         v_right = dist_ctrl + head_ctrl
         return [v_left, v_right]
@@ -113,15 +106,13 @@ class WayPointTest(unittest.TestCase):
         self.assertTrue(vl > 0)
         self.assertTrue(vr > 0)
 
-pose_x = 0
-pose_y = 0
-pose_theta = 0
+    def test_dont_advance_if_heading_error_is_too_large(self):
+        pose = RobotPose(0,0,0)
+        # todo
 
-def odometry_msg_handler(topic, msg):
-    global pose_x
-    global pose_y
-    global pose_theta
-    pose_x, pose_y, pose_theta = msg
+def odometry_msg_handler(pose, topic, msg):
+    x, y, theta = msg
+    pose.update(x, y, theta)
 
 def main():
     parser = argparse.ArgumentParser()
@@ -135,26 +126,24 @@ def main():
                         pub_addr='ipc://ipc/sink')
     node = zmqmsgbus.Node(bus)
 
-    node.register_message_handler('odometry_raw', odometry_msg_handler)
+    pose = RobotPose(0,0,0)
+    handler = lambda topic, msg: odometry_msg_handler(pose, topic, msg)
+    node.register_message_handler('odometry_raw', handler)
 
     time.sleep(1)
 
-    x, y, theta = pose_x, pose_y, pose_theta
-    target_x = x + args.target_x * math.cos(theta) - args.target_y * math.sin(theta)
-    target_y = y + args.target_x * math.sin(theta) + args.target_y * math.cos(theta)
-    target_theta = periodic_error(theta + args.heading)
+    target_x = args.target_x
+    target_y = args.target_y
+    target_theta = args.heading
 
     waypoint = WayPoint()
     target = RobotPose(target_x, target_y, target_theta)
-    waypoint.set_target(target)
 
     while True:
-        pose = RobotPose.get()
-        v_left, v_right = waypoint.process(pose)
-        print(v_left, v_right, '\t', pose.x, pose.y, pose.theta)
+        v_left, v_right = waypoint.process(pose, target)
         node.call('/actuator/velocity', ['left-wheel', -v_left]) # left wheel velocity inversed
         node.call('/actuator/velocity', ['right-wheel', v_right])
-        time.sleep(1/WAYPOINTS_FREQUENCY)
+        time.sleep(1/waypoint.frequency)
 
 if __name__ == '__main__':
     main()
