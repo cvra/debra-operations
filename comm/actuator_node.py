@@ -3,7 +3,7 @@ import zmq
 import zmqmsgbus
 import time
 
-MASTER_BOARD_MSG_ADDR = ('192.168.3.20', 20000)
+MASTER_BOARD_MSG_ADDR = ('10.0.10.2', 20000)
 
 def get_state(name):
     try:

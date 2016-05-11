@@ -11,8 +11,8 @@ MESSAGE_FILTER = ['wheelbase_waypoint']
 SERVICE_FILTER = ['config_update', 'actuator_create_driver']
 
 MASTER_BOARD_STREAM_ADDR = ('0.0.0.0', 20042)
-MASTER_BOARD_SERVICE_ADDR = ('192.168.3.20', 20001)
-MASTER_BOARD_MSG_ADDR = ('192.168.3.20', 20000)
+MASTER_BOARD_SERVICE_ADDR = ('10.0.10.2', 20001)
+MASTER_BOARD_MSG_ADDR = ('10.0.10.2', 20000)
 
 bus = zmqmsgbus.Bus(sub_addr='ipc://ipc/source',
                     pub_addr='ipc://ipc/sink')
