@@ -2,24 +2,23 @@ import zmq
 import zmqmsgbus
 import argparse
 import math
+import numpy as np
 import time
 import unittest
 
 class RobotPose:
-    def __init__(self, x, y, theta):
-        self.x = x
-        self.y = y
-        self.theta = theta
+    def __init__(self, xy, theta):
+        self.update(xy, theta)
 
     def distance_to(self, target):
-        return math.sqrt((target.x - self.x)**2 + (target.y - self.y)**2)
+        return np.linalg.norm(target.xy - self.xy)
 
     def heading_to(self, target):
-        return math.atan2(target.y - self.y, target.x - self.x)
+        d = target.xy - self.xy
+        return math.atan2(d[1], d[0])
 
-    def update(self, x, y, theta):
-        self.x = x
-        self.y = y
+    def update(self, xy, theta):
+        self.xy = np.array(xy)
         self.theta = theta
 
 def periodic_error(angle):
@@ -31,11 +30,11 @@ def periodic_error(angle):
     return angle
 
 class PID:
-    def __init__(self, kp, ki, kd, i_limit, freq):
+    def __init__(self, kp, ki, kd, ilimit, freq):
         self.kp = kp
         self.ki = ki
         self.kd = kd
-        self.i_limit = i_limit
+        self.ilimit = ilimit
         self.frequency = freq
         self.integrator = 0
         self.previous_error = 0
@@ -43,8 +42,8 @@ class PID:
     def process(self, error):
         self.integrator += error
         # limit
-        self.integrator = min(self.integrator, self.i_limit)
-        self.integrator = max(self.integrator, -self.i_limit)
+        self.integrator = min(self.integrator, self.ilimit)
+        self.integrator = max(self.integrator, -self.ilimit)
 
         output  = - self.kp * error
         output += - self.ki * self.integrator / self.frequency
@@ -57,14 +56,12 @@ class WayPoint:
     def __init__(self):
         self.frequency = 50 # [Hz]
         self.min_distance_error = 10e-3 # [m]
-        self.max_heading_error = 0.2
-        self.waypoints_speed = 4
-        self.heading_pid = PID(kp=5,ki=0,kd=0.1,ilimit=0,self.frequency)
-        self.distance_pid = PID(kp=250,ki=0,kd=0,ilimit=0,self.frequency)
+        self.max_heading_error = 0.2 # [rad]
+        self.waypoints_speed = 4 # [m/s]
+        self.heading_pid = PID(kp=5,ki=0,kd=0.1,ilimit=0,freq=self.frequency)
+        self.distance_pid = PID(kp=250,ki=0,kd=0,ilimit=0,freq=self.frequency)
 
-    def process(self, pose, target):
-        if target is None:
-            return [0, 0]
+    def error(self, pose, target):
         distance_to_wp = pose.distance_to(target)
         heading_error = 0
         distance_error = 0
@@ -80,53 +77,56 @@ class WayPoint:
             # arrived at taget; turn to target heading
             heading_error = periodic_error(pose.theta - target.theta)
 
+        return [distance_error, heading_error]
+
+    def process(self, pose, target):
+        distance_error, heading_error = self.error(pose, target)
         head_ctrl = self.heading_pid.process(heading_error)
-        # dist_ctrl = self.distance_pid.process(distance_error)
-        dist_ctrl = -250*distance_error
+        dist_ctrl = self.distance_pid.process(distance_error)
         v_left = dist_ctrl - head_ctrl
         v_right = dist_ctrl + head_ctrl
         return [v_left, v_right]
 
 class WayPointTest(unittest.TestCase):
     def test_heading_control_sign(self):
-        pose = RobotPose(0,0,0)
-        target = RobotPose(0,0,0.5)
+        p = RobotPose(xy=[0,0],theta=0)
+        t = RobotPose(xy=[0,0],theta=0.5)
         waypoint = WayPoint()
-        waypoint.set_target(target)
-        vl, vr = waypoint.process(pose)
+        vl, vr = waypoint.process(pose=p, target=t)
         self.assertTrue(vl < 0)
         self.assertTrue(vr > 0)
 
     def test_dist_control_sign(self):
-        pose = RobotPose(0,0,0)
-        target = RobotPose(1,0,0)
+        p = RobotPose(xy=[0,0],theta=0)
+        t = RobotPose(xy=[1,0],theta=0)
         waypoint = WayPoint()
-        waypoint.set_target(target)
-        vl, vr = waypoint.process(pose)
+        vl, vr = waypoint.process(pose=p, target=t)
         self.assertTrue(vl > 0)
         self.assertTrue(vr > 0)
 
     def test_dont_advance_if_heading_error_is_too_large(self):
-        pose = RobotPose(0,0,0)
-        # todo
+        p = RobotPose(xy=[0,0],theta=0)
+        t = RobotPose(xy=[0,1],theta=0)
+        wp = WayPoint()
+        dist, head = wp.error(pose=p, target=t)
+        self.assertTrue(dist == 0)
 
 def odometry_msg_handler(pose, topic, msg):
     x, y, theta = msg
-    pose.update(x, y, theta)
+    pose.update([x,y], theta)
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('target_x', type=float)
     parser.add_argument('target_y', type=float)
-    parser.add_argument('heading', type=float)
+    parser.add_argument('target_theta', type=float)
     args = parser.parse_args()
-
 
     bus = zmqmsgbus.Bus(sub_addr='ipc://ipc/source',
                         pub_addr='ipc://ipc/sink')
     node = zmqmsgbus.Node(bus)
 
-    pose = RobotPose(0,0,0)
+    pose = RobotPose(xy=[0,0],theta=0)
     handler = lambda topic, msg: odometry_msg_handler(pose, topic, msg)
     node.register_message_handler('odometry_raw', handler)
 
