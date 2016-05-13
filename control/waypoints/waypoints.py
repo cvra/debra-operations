@@ -69,7 +69,7 @@ class WayPoint:
         if distance_to_wp > self.min_distance_error:
             heading_to_wp = pose.heading_to(target)
             heading_error = periodic_error(pose.theta - heading_to_wp)
-            if heading_error < self.max_heading_error:
+            if abs(heading_error) < self.max_heading_error:
                 # distance to the waypoint projected onto the heading error
                 next_setpoint =  self.waypoints_speed / self.frequency
                 distance_error = -math.cos(heading_error) * min(next_setpoint, distance_to_wp)
