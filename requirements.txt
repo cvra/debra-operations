@@ -1,12 +1,13 @@
 nose
 msgpack-python
 zmq
-pyyaml
 numpy
-./comm/serial-datagram/python
-./comm/simplerpc/python
-./comm/zmqmsgbus
-./drivers/tim561_lidar_driver
-./control/actuator-control-interface
-./bus/CAN-USB-dongle-fw/python
-./bus/can-bootloader/client
+pyyaml
+-e ./comm/serial-datagram/python
+-e ./comm/simplerpc/python
+-e ./comm/zmqmsgbus
+-e ./drivers/tim561_lidar_driver
+-e ./control/actuator-control-interface
+-e ./bus/CAN-USB-dongle-fw/src/datagram-messages/python
+-e ./bus/CAN-USB-dongle-fw/python
+-e ./bus/can-bootloader/client
