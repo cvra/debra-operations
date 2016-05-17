@@ -31,12 +31,14 @@ class MyUDPHandler_scan(socketserver.BaseRequestHandler):
         data = self.request[0]
         socket = self.request[1]
 
-        #©print('Datagram received, len = '+str(len(data)))
-
         count = len(data) // struct.calcsize('f')
         data = struct.unpack('f' * count, data)
+        data = np.array(data)
 
-        header['Data'] = data[3:]
+        random_reflection_idx = np.random.random_integers(3, len(data)-1, 5)
+        data[random_reflection_idx] *= (1+np.random.rand(5))
+
+        header['Data'] = tuple(data[3:])
         node.publish('/lidar/scan', header)
 
 class MyUDPHandler_position(socketserver.BaseRequestHandler):
@@ -44,8 +46,6 @@ class MyUDPHandler_position(socketserver.BaseRequestHandler):
     def handle(self):
         data = self.request[0]
         socket = self.request[1]
-
-        #print('Datagram received, len = '+str(len(data)))
 
         count = len(data) // struct.calcsize('f')
         data = struct.unpack('f' * count, data)
