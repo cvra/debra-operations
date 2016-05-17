@@ -2,6 +2,7 @@ nose
 msgpack-python
 zmq
 pyyaml
+numpy
 ./comm/serial-datagram/python
 ./comm/simplerpc/python
 ./comm/zmqmsgbus
