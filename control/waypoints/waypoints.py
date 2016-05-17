@@ -134,10 +134,10 @@ def main():
 
     target_x = args.target_x
     target_y = args.target_y
-    target_theta = args.heading
+    target_theta = args.target_theta
 
     waypoint = WayPoint()
-    target = RobotPose(target_x, target_y, target_theta)
+    target = RobotPose(xy=[target_x, target_y], theta=target_theta)
 
     while True:
         v_left, v_right = waypoint.process(pose, target)
