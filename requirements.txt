@@ -1,6 +1,6 @@
 nose
 msgpack-python
-zmq
+pyzmq==15.2.0
 numpy
 pyyaml
 -e ./comm/serial-datagram/python
