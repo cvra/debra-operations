@@ -41,6 +41,19 @@ Then start the node of the master-board:
 python comm/bus_master_node.py
 ```
 
+## Forward Bus Topics
+
+To forward the bus topics running on the robot to your laptop run:
+
+```
+python -m zmqmsgbus.tools.forwarder --to tcp://192.168.2.10:13370 --bind_from
+```
+and
+```
+python -m zmqmsgbus.tools.forwarder --from tcp://192.168.2.10:13371 --bind_to
+```
+
+
 ## Example of single actuator control
 You need to have an IP `192.168.3.0/24`.
 

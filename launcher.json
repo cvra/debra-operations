@@ -1,6 +1,8 @@
 {
     "Bus": {
-        "command": ["python", "-mzmqmsgbus.tools.bus"],
+        "command": ["python", "-mzmqmsgbus.tools.bus",
+                    "--in", "ipc://ipc/sink", "tcp://*:13370",
+                    "--out", "ipc://ipc/source", "tcp://*:13371"],
         "restart": true
     },
     "Master Node": {
