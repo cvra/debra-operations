@@ -24,7 +24,7 @@ def message_handler_cb(topic, msg):
 def publish_msg_to_zmq_cb(todo, msg, args):
     # print('receiving:', msg, args)
     global node
-    node.publish(msg, args)
+    node.publish('/'+msg, args)
 
 # service calls zmq -> cvra_rpc
 for service in SERVICE_FILTER:

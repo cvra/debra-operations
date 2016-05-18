@@ -128,7 +128,7 @@ def main():
 
     pose = RobotPose(xy=[0,0],theta=0)
     handler = lambda topic, msg: odometry_msg_handler(pose, topic, msg)
-    node.register_message_handler('odometry_raw', handler)
+    node.register_message_handler('/odometry_raw', handler)
 
     time.sleep(1)
 
