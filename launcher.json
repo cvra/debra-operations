@@ -24,5 +24,15 @@
         "command": ["python", "state_estimation/position.py"],
         "depends": ["Bus"],
         "restart": true
+    },
+    "Lidar Driver": {
+        "command": ["python", "-m", "sicktim561driver.scan"],
+        "depends": ["Bus"],
+        "restart": true
+    },
+    "Lidar Position Estimation": {
+        "command": ["python", "state_estimation/localization-stack/lidar_localization.py", "state_estimation/localization-stack/config.json"],
+        "depends": ["Bus", "Lidar Driver"],
+        "restart": true
     }
 }
