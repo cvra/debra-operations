@@ -19,5 +19,10 @@
         "command": ["python", "comm/actuator_node.py"],
         "depends": ["Bus"],
         "restart": true
+    },
+    "Position Estimation Node": {
+        "command": ["python", "state_estimation/position.py"],
+        "depends": ["Bus"],
+        "restart": true
     }
 }
