@@ -1,5 +1,12 @@
 # debra-operations
 
+## deploy to embedded PC
+
+- connect to the robot wifi, the raspi will give you an IP & internet connection
+- run `deploy.sh` to copy the source code to the robot and install the python modules
+- the code is in `/home/cvra/run/`
+- connect to the PC (`mosh cvra@192.168.2.10`) and run `run.sh` to run your code
+
 ## Setup and/or start virtual environment
 
 (_This only works in fish shell_)
@@ -56,9 +63,12 @@ Example: plot the postition and velocity of the left-wrist actuator
 python tools/message_graph.py position:left-wrist.0 position:left-wrist.1
 ```
 
-## Network Setup
+## Network Setup (without embedded PC)
 
 The master-board is on 192.168.3.20.
 
 If you want to run the software-stack on your PC you should have the IP 192.168.3.1 because the master-board uses this address as ntp time server.
 Also make sure your `restrict` config (found under `/private/etc/ntp-restrict.conf` on OS X) does not include `noquery`.
+
+In case the embedded PC is connected, it distributes the IPs with DHCP. It also serves NTP.
+
