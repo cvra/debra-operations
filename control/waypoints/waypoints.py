@@ -55,10 +55,10 @@ class PID:
 class WayPoint:
     def __init__(self):
         self.frequency = 50 # [Hz]
-        self.min_distance_error = 10e-3 # [m]
+        self.min_distance_error = 0.05 # [m]
         self.max_heading_error = 0.2 # [rad]
-        self.waypoints_speed = 4 # [m/s]
-        self.heading_pid = PID(kp=5,ki=0,kd=0.1,ilimit=0,freq=self.frequency)
+        self.waypoints_speed = 2 # [m/s]
+        self.heading_pid = PID(kp=2,ki=0.5,kd=0.1,ilimit=0,freq=self.frequency)
         self.distance_pid = PID(kp=250,ki=0,kd=0,ilimit=0,freq=self.frequency)
 
     def error(self, pose, target):
