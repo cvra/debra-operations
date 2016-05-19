@@ -33,7 +33,7 @@
         "restart": true
     },
     "Lidar Position Estimation": {
-        "command": ["python", "state_estimation/localization-stack/lidar_localization.py", "state_estimation/localization-stack/config.json"],
+        "command": ["python", "state_estimation/localization-stack/lidar_localization.py", "state_estimation/localization-stack/config.json", "--logs"],
         "depends": ["Bus", "Lidar Driver"],
         "restart": true
     }
