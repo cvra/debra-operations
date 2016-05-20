@@ -12,13 +12,18 @@ class RobotPose:
     def distance_to(self, target):
         return np.linalg.norm(target.xy - self.xy)
 
-    def heading_to(self, target):
+    def abs_bearing_to(self, target):
         d = target.xy - self.xy
         return math.atan2(d[1], d[0])
+
+    def rel_bearing_to(self, target):
+        b = self.abs_bearing_to(target)
+        return b - self.theta
 
     def update(self, xy, theta):
         self.xy = np.array(xy)
         self.theta = theta
+
 
 def periodic_error(angle):
     angle = math.fmod(angle, 2*math.pi)
@@ -27,6 +32,7 @@ def periodic_error(angle):
     if angle < -math.pi:
         return angle + 2*math.pi
     return angle
+
 
 class PID:
     def __init__(self, kp, ki, kd, ilimit, freq):
@@ -66,8 +72,8 @@ class WayPoint:
         distance_error = 0
 
         if distance_to_wp > self.min_distance_error:
-            heading_to_wp = pose.heading_to(target)
-            heading_error = periodic_error(pose.theta - heading_to_wp)
+            bearing_to_wp = pose.abs_bearing_to(target)
+            heading_error = periodic_error(pose.theta - bearing_to_wp)
             if abs(heading_error) < self.max_heading_error:
                 # distance to the waypoint projected onto the heading error
                 next_setpoint =  self.waypoints_speed / self.frequency
