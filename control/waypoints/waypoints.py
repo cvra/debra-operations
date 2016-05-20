@@ -147,7 +147,8 @@ def main():
     target_x = args.target_x
     target_y = args.target_y
 
-    if 'theta' in args:
+    # if 'theta' in args:
+    if args.theta is not None:
         target_theta = float(args.theta)
     else:
         target_theta = None
