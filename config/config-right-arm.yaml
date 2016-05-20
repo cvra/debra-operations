@@ -32,8 +32,8 @@ actuator:
                 kd: 2.
 
             low_batt_th: 12
-            acceleration_limit: 100.
-            velocity_limit: 1.
+            acceleration_limit: 10.
+            velocity_limit: 2.
             torque_limit: 1
 
     right-elbow:
@@ -144,5 +144,5 @@ actuator:
 
             low_batt_th: 12
             acceleration_limit: 100.
-            velocity_limit: 8.
+            velocity_limit: 3.
             torque_limit: 1.3
