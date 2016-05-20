@@ -95,20 +95,17 @@ class WayPoint:
         self.heading_error_large = binaryHysteresis(activate=0.2, deactivate=0.1)
 
     def error(self, pose, target):
-        distance_to_wp = pose.distance_to(target)
-        heading_error = 0
+        bearing_to_wp = pose.abs_bearing_to(target)
+        heading_error = periodic_error(pose.theta - bearing_to_wp)
         distance_error = -pose.forward_distance_to(target)
         distance_error = limit(distance_error, -self.waypoints_speed, self.waypoints_speed)
 
-        if distance_to_wp > self.min_distance_error:
-            bearing_to_wp = pose.abs_bearing_to(target)
-            heading_error = periodic_error(pose.theta - bearing_to_wp)
+        if pose.distance_to(target) > self.min_distance_error:
             if self.heading_error_large.evaluate(abs(heading_error)):
                 distance_error = 0
         else:
             # arrived at taget; turn to target heading
             heading_error = periodic_error(pose.theta - target.theta)
-            distance_error = -pose.forward_distance_to(target)
 
         return [distance_error, heading_error]
 
