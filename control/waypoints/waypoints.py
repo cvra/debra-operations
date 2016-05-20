@@ -20,6 +20,11 @@ class RobotPose:
         b = self.abs_bearing_to(target)
         return b - self.theta
 
+    def forward_distance_to(self, target):
+        d = target.xy - self.xy
+        h = [math.cos(self.theta), math.sin(self.theta)]
+        return np.dot(d, h)
+
     def update(self, xy, theta):
         self.xy = np.array(xy)
         self.theta = theta
@@ -32,6 +37,14 @@ def periodic_error(angle):
     if angle < -math.pi:
         return angle + 2*math.pi
     return angle
+
+
+def limit(val, min, max):
+    if val < min:
+        return min
+    if val > max:
+        return max
+    return val
 
 
 class PID:
@@ -57,30 +70,31 @@ class PID:
         self.previous_error = error
         return output
 
+
 class WayPoint:
     def __init__(self):
         self.frequency = 50 # [Hz]
         self.min_distance_error = 0.05 # [m]
         self.max_heading_error = 0.2 # [rad]
-        self.waypoints_speed = 2 # [m/s]
+        self.waypoints_speed = 0.1 # [m/s]
         self.heading_pid = PID(kp=2,ki=0.5,kd=0.1,ilimit=0,freq=self.frequency)
         self.distance_pid = PID(kp=250,ki=0,kd=0,ilimit=0,freq=self.frequency)
 
     def error(self, pose, target):
         distance_to_wp = pose.distance_to(target)
         heading_error = 0
-        distance_error = 0
+        distance_error = -pose.forward_distance_to(target)
+        distance_error = limit(distance_error, -self.waypoints_speed, self.waypoints_speed)
 
         if distance_to_wp > self.min_distance_error:
             bearing_to_wp = pose.abs_bearing_to(target)
             heading_error = periodic_error(pose.theta - bearing_to_wp)
-            if abs(heading_error) < self.max_heading_error:
-                # distance to the waypoint projected onto the heading error
-                next_setpoint =  self.waypoints_speed / self.frequency
-                distance_error = -math.cos(heading_error) * min(next_setpoint, distance_to_wp)
+            if abs(heading_error) > self.max_heading_error:
+                distance_error = 0
         else:
             # arrived at taget; turn to target heading
             heading_error = periodic_error(pose.theta - target.theta)
+            distance_error = -pose.forward_distance_to(target)
 
         return [distance_error, heading_error]
 

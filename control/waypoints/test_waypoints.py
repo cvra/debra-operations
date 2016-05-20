@@ -23,6 +23,22 @@ class RobotPoseTest(unittest.TestCase):
         t = wp.RobotPose(xy=[0, 1], theta=0)
         self.assertAlmostEqual(p.rel_bearing_to(t), 0)
 
+    def test_forward_distance_to(self):
+        p = wp.RobotPose(xy=[1, 1], theta=math.pi/2)
+        t = wp.RobotPose(xy=[3, 2], theta=0)
+        self.assertAlmostEqual(p.forward_distance_to(t), 1)
+        p = wp.RobotPose(xy=[1, 1], theta=-math.pi/2)
+        t = wp.RobotPose(xy=[3, 2], theta=0)
+        self.assertAlmostEqual(p.forward_distance_to(t), -1)
+
+
+class HelperTest(unittest.TestCase):
+
+    def test_limit_min(self):
+        self.assertEqual(wp.limit(-2, min=-1, max=1), -1)
+        self.assertEqual(wp.limit(2, min=-1, max=1), 1)
+        self.assertEqual(wp.limit(2, min=-1, max=3), 2)
+
 
 class WayPointTest(unittest.TestCase):
     def test_heading_control_sign(self):
