@@ -47,6 +47,20 @@ def limit(val, min, max):
     return val
 
 
+class binaryHysteresis:
+    def __init__(self, activate, deactivate):
+        self.activate = activate
+        self.deactivate = deactivate
+        self.activated = False
+
+    def evaluate(self, val):
+        if val > self.activate:
+            self.activated = True
+        if val < self.deactivate:
+            self.activated = False
+        return self.activated
+
+
 class PID:
     def __init__(self, kp, ki, kd, ilimit, freq):
         self.kp = kp
@@ -75,10 +89,10 @@ class WayPoint:
     def __init__(self):
         self.frequency = 50 # [Hz]
         self.min_distance_error = 0.05 # [m]
-        self.max_heading_error = 0.2 # [rad]
         self.waypoints_speed = 0.1 # [m/s]
         self.heading_pid = PID(kp=2,ki=0.5,kd=0.1,ilimit=0,freq=self.frequency)
         self.distance_pid = PID(kp=250,ki=0,kd=0,ilimit=0,freq=self.frequency)
+        self.heading_error_large = binaryHysteresis(activate=0.2, deactivate=0.1)
 
     def error(self, pose, target):
         distance_to_wp = pose.distance_to(target)
@@ -89,7 +103,7 @@ class WayPoint:
         if distance_to_wp > self.min_distance_error:
             bearing_to_wp = pose.abs_bearing_to(target)
             heading_error = periodic_error(pose.theta - bearing_to_wp)
-            if abs(heading_error) > self.max_heading_error:
+            if self.heading_error_large.evaluate(abs(heading_error)):
                 distance_error = 0
         else:
             # arrived at taget; turn to target heading

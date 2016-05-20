@@ -39,6 +39,15 @@ class HelperTest(unittest.TestCase):
         self.assertEqual(wp.limit(2, min=-1, max=1), 1)
         self.assertEqual(wp.limit(2, min=-1, max=3), 2)
 
+    def test_hysteresis(self):
+        h = wp.binaryHysteresis(0.6, 0.4)
+        self.assertFalse(h.evaluate(0.1))
+        self.assertFalse(h.evaluate(0.5))
+        self.assertTrue(h.evaluate(0.7))
+        self.assertTrue(h.evaluate(0.5))
+        self.assertFalse(h.evaluate(0.3))
+
+
 
 class WayPointTest(unittest.TestCase):
     def test_heading_control_sign(self):
