@@ -9,6 +9,7 @@ scikit-image==0.11.3
 -e ./comm/serial-datagram/python
 -e ./comm/simplerpc/python
 -e ./comm/zmqmsgbus
+-e ./control/arm-trajectories
 -e ./drivers/tim561_lidar_driver
 -e ./control/actuator-control-interface
 -e ./bus/CAN-USB-dongle-fw/src/datagram-messages/python

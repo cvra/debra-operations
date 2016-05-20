@@ -28,3 +28,6 @@
 [submodule "state_estimation/localization-stack"]
 	path = state_estimation/localization-stack
 	url = https://github.com/cvra/localization-stack.git
+[submodule "control/arm-trajectories"]
+	path = control/arm-trajectories
+	url = https://github.com/cvra/arm-trajectories.git
