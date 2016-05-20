@@ -90,7 +90,8 @@ class WayPoint:
         self.frequency = 50 # [Hz]
         self.min_distance_error = 0.05 # [m]
         self.waypoints_speed = 0.1 # [m/s]
-        self.heading_pid = PID(kp=2,ki=0.5,kd=0.1,ilimit=0,freq=self.frequency)
+        self.rotation_speed = 1 # [rad/s]
+        self.heading_pid = PID(kp=10,ki=0.5,kd=0.1,ilimit=0,freq=self.frequency)
         self.distance_pid = PID(kp=250,ki=0,kd=0,ilimit=0,freq=self.frequency)
         self.heading_error_large = binaryHysteresis(activate=0.2, deactivate=0.1)
 
@@ -110,6 +111,7 @@ class WayPoint:
             else:
                 heading_error = periodic_error(pose.theta - target.theta)
 
+        heading_error = limit(heading_error, -self.rotation_speed, self.rotation_speed)
         return [distance_error, heading_error]
 
     def process(self, pose, target):
