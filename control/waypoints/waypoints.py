@@ -104,8 +104,11 @@ class WayPoint:
             if self.heading_error_large.evaluate(abs(heading_error)):
                 distance_error = 0
         else:
-            # arrived at taget; turn to target heading
-            heading_error = periodic_error(pose.theta - target.theta)
+            # arrived at taget; turn to target heading if specified
+            if target.theta is None:
+                heading_error = 0
+            else:
+                heading_error = periodic_error(pose.theta - target.theta)
 
         return [distance_error, heading_error]
 
@@ -126,7 +129,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('target_x', type=float)
     parser.add_argument('target_y', type=float)
-    parser.add_argument('target_theta', type=float)
+    parser.add_argument('--theta')
     args = parser.parse_args()
 
     bus = zmqmsgbus.Bus(sub_addr='ipc://ipc/source',
@@ -141,7 +144,11 @@ def main():
 
     target_x = args.target_x
     target_y = args.target_y
-    target_theta = args.target_theta
+
+    if 'theta' in args:
+        target_theta = float(args.theta)
+    else:
+        target_theta = None
 
     waypoint = WayPoint()
     target = RobotPose(xy=[target_x, target_y], theta=target_theta)
