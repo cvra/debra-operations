@@ -1,10 +1,9 @@
-import zmq
 import zmqmsgbus
 import argparse
 import math
 import numpy as np
 import time
-import unittest
+
 
 class RobotPose:
     def __init__(self, xy, theta):
@@ -87,29 +86,6 @@ class WayPoint:
         v_right = dist_ctrl + head_ctrl
         return [v_left, v_right]
 
-class WayPointTest(unittest.TestCase):
-    def test_heading_control_sign(self):
-        p = RobotPose(xy=[0,0],theta=0)
-        t = RobotPose(xy=[0,0],theta=0.5)
-        waypoint = WayPoint()
-        vl, vr = waypoint.process(pose=p, target=t)
-        self.assertTrue(vl < 0)
-        self.assertTrue(vr > 0)
-
-    def test_dist_control_sign(self):
-        p = RobotPose(xy=[0,0],theta=0)
-        t = RobotPose(xy=[1,0],theta=0)
-        waypoint = WayPoint()
-        vl, vr = waypoint.process(pose=p, target=t)
-        self.assertTrue(vl > 0)
-        self.assertTrue(vr > 0)
-
-    def test_dont_advance_if_heading_error_is_too_large(self):
-        p = RobotPose(xy=[0,0],theta=0)
-        t = RobotPose(xy=[0,1],theta=0)
-        wp = WayPoint()
-        dist, head = wp.error(pose=p, target=t)
-        self.assertTrue(dist == 0)
 
 def odometry_msg_handler(pose, topic, msg):
     x, y, theta = msg
