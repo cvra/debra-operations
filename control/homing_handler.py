@@ -1,6 +1,5 @@
 from math import copysign
 import time
-import threading
 
 import zmqmsgbus
 
@@ -37,23 +36,24 @@ class Indexer:
     def turn_on_feedback_stream(self, actuator):
         time.sleep(1)
         self.node.call('/actuator/config_update',
-                [{'actuator': {actuator.string_id: {
+                {'actuator': {actuator.string_id: {
                     'stream': {
                         'index':        10,
                         'motor_pos':    30
                     }
-                }}}])
+                }}})
 
     def turn_off_feedback_stream(self, actuator):
         self.node.call('/actuator/config_update',
-                [{'actuator': {actuator.string_id: {
+                {'actuator': {actuator.string_id: {
                     'stream': {
                         'index':        0,
                         'motor_pos':    0
                     }
-                }}}])
+                }}})
 
     def index_callback(self, actuator, index_pos):
+        index_pos = self.unwind(index_pos)
         if not actuator.stop:
             if not actuator.got_first:
                 actuator.index_pos = index_pos
@@ -70,8 +70,18 @@ class Indexer:
                     self.node.call('/actuator/position',
                             [actuator.string_id, actuator.index_pos])
 
+    @staticmethod
+    def unwind(a):
+        from math import pi
+        if a > pi:
+            return a - 2*pi
+        elif a < -pi:
+            return a + 2*pi
+        else:
+            return a
 
     def pos_callback(self, actuator, position):
+        position = self.unwind(position)
         if not actuator.stop:
             if not actuator.pos_setpoint_set:
                 actuator.pos_setpoint = position + actuator.pos_setpoint_factor
@@ -98,15 +108,8 @@ class Indexer:
                 elif sub_topic == 'position':
                     self.pos_callback(actuator, msg)
 
-    def server_thread(self, server):
-        server.serve_forever()
-        return
-
     def start(self):
         self.node.register_message_handler('/actuator/', self.message_cb)
-
-        t = threading.Thread(target=self.server_thread, args=(server,))
-        t.start()
 
         not_done = True
 
@@ -116,7 +119,5 @@ class Indexer:
                 if not a.stop:
                     not_done = True
             time.sleep(0.1)
-
-        server.shutdown()
 
         return {a.string_id: a.index_pos for a in self.actuators}

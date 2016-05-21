@@ -12,6 +12,17 @@ class HomingHandlerTestCase(unittest.TestCase):
         indexer = Indexer()
         actuator = indexer.Actuator('test')
 
+    def test_unwind(self):
+        from math import pi
+        value = Indexer.unwind(2*pi - 0.1)
+        self.assertAlmostEqual(-0.1, value)
+        value = Indexer.unwind(0.1)
+        self.assertAlmostEqual(0.1, value)
+        value = Indexer.unwind(-0.1)
+        self.assertAlmostEqual(-0.1, value)
+        value = Indexer.unwind(0.1 - 2*pi)
+        self.assertAlmostEqual(0.1, value)
+
 
 class IndexCallbackTestCase(unittest.TestCase):
     @patch('homing_handler.zmqmsgbus.Node')
