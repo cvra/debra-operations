@@ -8,7 +8,7 @@ class HomingHandlerTestCase(unittest.TestCase):
         indexer = Indexer()
 
     @patch('homing_handler.zmqmsgbus.Node')
-    def test_can_create_actuator(self, open_package_mock):
+    def test_can_create_indexer_actuator(self, open_package_mock):
         indexer = Indexer()
         actuator = indexer.Actuator('test')
 
