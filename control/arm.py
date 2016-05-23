@@ -3,14 +3,37 @@ import time
 from arm_trajectories import scara
 from collections import OrderedDict
 import sys
+import queue
 import homing_handler
 from math import pi
+import math
+
 
 class Arm:
-    def __init__(self, upper_arm=0.14, forearm=0.052, z_meter_per_rad=0.005/2/pi):
+    """
+    Hand: theta=0 in the direction hand center to TCP
+    2 5 1
+     \ /
+      o
+     / \
+    3   4
+    """
+
+    def __init__(self,
+                 upper_arm=0.14,
+                 forearm=0.052,
+                 z_meter_per_rad=0.005/2/pi,
+                 tool_1_angle=pi,
+                 tool_distance=0.03,
+                 tool_5_distance=0.07,
+                 tool_5_z_offset=0.03):
         self.upper_arm = upper_arm
         self.forearm = forearm
         self.z_meter_per_rad = z_meter_per_rad
+        self.tool_1_angle = tool_1_angle
+        self.tool_distance = tool_distance
+        self.tool_5_distance = tool_5_distance
+        self.tool_5_z_offset = tool_5_z_offset
         self.joints = OrderedDict([('z', 0),
                                    ('shoulder', 0),
                                    ('elbow', 0),
@@ -36,7 +59,10 @@ class Arm:
                                         self.forearm,
                                         self.z_meter_per_rad)
 
-    def move_hand(self, x, y, z):
+    def get_hand_orientation(self):
+        return self.joints['shoulder'] + self.joints['elbow'] + self.joints['wrist']
+
+    def move_hand(self, x, y, z, theta):
         limits = [self.joint_limits['shoulder'], self.joint_limits['elbow'], self.joint_limits['z']]
         shoulder, elbow, z_actuator = scara.inverse_kinematics([x, y, z],
                                                                self.upper_arm,
@@ -46,6 +72,33 @@ class Arm:
         self.joints['shoulder'] = shoulder
         self.joints['elbow'] = elbow
         self.joints['z'] = z_actuator
+        self.joints['wrist'] = theta - shoulder - elbow
+
+    def move_tcp(self, tool, x, y, z, theta):
+        tcp_offset = self.get_tcp_offset(tool, theta)
+        self.move_hand(x - tcp_offset[0],
+                       y - tcp_offset[1],
+                       z - tcp_offset[2],
+                       theta - tcp_offset[3])
+
+    def get_tcp_offset(self, tool, theta):
+        """ Offset from TCP to center of hand in the arm reference frame.
+        """
+        if tool not in [1, 2, 3, 4, 5]:
+            raise ValueError
+
+        tool_angles = [0, pi/2, pi, 3/2*pi, pi/4]
+        theta_hand = self.tool_1_angle + tool_angles[tool-1]
+        if tool == 5:
+            x = self.tool_5_distance * math.cos(theta)
+            y = self.tool_5_distance * math.sin(theta)
+            z = self.tool_5_z_offset
+        else:
+            x = self.tool_distance * math.cos(theta)
+            y = self.tool_distance * math.sin(theta)
+            z = 0
+
+        return x, y, z, theta_hand
 
     def get_actuators(self):
         res = self.joints.copy()
@@ -55,8 +108,8 @@ class Arm:
 
 
 def actuator_position(node, arm, joints):
-    node.call('/actuator/position', [arm + '-shoulder', joints['shoulder']])
-    node.call('/actuator/position', [arm + '-elbow', joints['elbow']])
+    node.call('/actuator/position', [arm + '-shoulder', -joints['shoulder']])
+    node.call('/actuator/position', [arm + '-elbow', -joints['elbow']])
     node.call('/actuator/position', [arm + '-wrist', joints['wrist']])
     node.call('/actuator/position', [arm + '-z', joints['z']])
 
@@ -76,9 +129,18 @@ def main():
     l.set_zeros({'z': -0.21/(0.005/2/pi)})
 
     while True:
-        hand = node.recv('/left-arm/hand/setpoint')
-        l.move_hand(*[float(v) for v in hand])
-        actuator_position(node, 'left', l.get_actuators())
+        try:
+            setpoint = node.recv('/left-arm/setpoint')
+            if setpoint[0] == 0:
+                l.move_hand(*[float(v) for v in setpoint[1:]])
+            else:
+                l.move_tcp(int(setpoint[0]), *[float(v) for v in setpoint[1:]])
+            actuator_position(node, 'left', l.get_actuators())
+        except queue.Empty:
+            pass
+        except ValueError as e:
+            print(e)
+        time.sleep(0.01)
 
 
 if __name__ == '__main__':
