@@ -117,6 +117,14 @@ def actuator_position(node, arm, joints, offsets):
               [arm + '-z', joints['z'] + offsets[arm + '-z']])
 
 
+def map_body_to_arm_frame(x, y, z, theta, arm):
+    SHOULDER_POSITION = 0.1
+    if arm == 'left':
+        return y - SHOULDER_POSITION, -x, z, theta - pi/2
+    if arm == 'right':
+        return -y - SHOULDER_POSITION, x, z, theta + pi/2
+
+
 def main():
     bus = zmqmsgbus.Bus(sub_addr='ipc://ipc/source',
                         pub_addr='ipc://ipc/sink')
@@ -151,22 +159,24 @@ def main():
 
     while True:
         try:
-            setpoint = node.recv('/left-arm/setpoint')
+            setpoint = node.recv('/left-arm/setpoint', timeout=0)
+            setpoint = [int(setpoint[0])] + list(map_body_to_arm_frame(*[float(v) for v in setpoint[1:]], arm='left'))
             if setpoint[0] == 0:
-                l.move_hand(*[float(v) for v in setpoint[1:]])
+                l.move_hand(*setpoint[1:])
             else:
-                l.move_tcp(int(setpoint[0]), *[float(v) for v in setpoint[1:]])
+                l.move_tcp(*setpoint)
             actuator_position(node, 'left', l.get_actuators(), offsets)
         except queue.Empty:
             pass
         except ValueError as e:
             print(e)
         try:
-            setpoint = node.recv('/right-arm/setpoint')
+            setpoint = node.recv('/right-arm/setpoint', timeout=0)
+            setpoint = [int(setpoint[0])] + list(map_body_to_arm_frame(*[float(v) for v in setpoint[1:]], arm='right'))
             if setpoint[0] == 0:
-                r.move_hand(*[float(v) for v in setpoint[1:]])
+                r.move_hand(*setpoint[1:])
             else:
-                r.move_tcp(int(setpoint[0]), *[float(v) for v in setpoint[1:]])
+                r.move_tcp(*setpoint)
             actuator_position(node, 'right', r.get_actuators(), offsets)
         except queue.Empty:
             pass

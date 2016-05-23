@@ -88,3 +88,17 @@ class TestArm(unittest.TestCase):
         self.assertAlmostEqual(3, hand[1] + tcp_offset[1])
         self.assertAlmostEqual(1, hand[2] + tcp_offset[2])
         self.assertAlmostEqual(0, hand_orientation + tcp_offset[3])
+
+    def test_map_body_to_arm_frame_left(self):
+        x, y, z, theta = map_body_to_arm_frame(1, 2, 3, 4, 'left')
+        self.assertAlmostEqual(2 - 0.1, x)
+        self.assertAlmostEqual(-1, y)
+        self.assertAlmostEqual(3, z)
+        self.assertAlmostEqual(4 - pi/2, theta)
+
+    def test_map_body_to_arm_frame_right(self):
+        x, y, z, theta = map_body_to_arm_frame(1, 2, 3, 4, 'right')
+        self.assertAlmostEqual(-2 - 0.1, x)
+        self.assertAlmostEqual(1, y)
+        self.assertAlmostEqual(3, z)
+        self.assertAlmostEqual(4 + pi/2, theta)
