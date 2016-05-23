@@ -24,9 +24,10 @@ class Arm:
                  upper_arm=0.14,
                  forearm=0.052,
                  z_meter_per_rad=0.005/2/pi,
-                 tool_distance=0.03,
-                 tool_5_distance=0.07,
-                 tool_5_z_offset=0.03):
+                 tool_distance=0.041,
+                 tool_5_distance=0.069,
+                 tool_5_z_offset=0.0375,
+                 negative_elbow_angle=False):
         self.upper_arm = upper_arm
         self.forearm = forearm
         self.z_meter_per_rad = z_meter_per_rad
@@ -118,7 +119,7 @@ def actuator_position(node, arm, joints, offsets):
 
 
 def map_body_to_arm_frame(x, y, z, theta, arm):
-    SHOULDER_POSITION = 0.1
+    SHOULDER_POSITION = 0.23941/2
     if arm == 'left':
         return y - SHOULDER_POSITION, -x, z, theta - pi/2
     if arm == 'right':
@@ -136,7 +137,7 @@ def main():
     left_arm_config = yaml.load(open("config/config-left-arm.yaml"))
     right_arm_config = yaml.load(open("config/config-right-arm.yaml"))
 
-    l = Arm()
+    l = Arm(negative_elbow_angle=True)
     r = Arm()
 
     endstopper = homing_handler.Endstopper()

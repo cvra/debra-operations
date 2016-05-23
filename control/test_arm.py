@@ -91,14 +91,14 @@ class TestArm(unittest.TestCase):
 
     def test_map_body_to_arm_frame_left(self):
         x, y, z, theta = arm.map_body_to_arm_frame(1, 2, 3, 4, 'left')
-        self.assertAlmostEqual(2 - 0.1, x)
+        self.assertAlmostEqual(2 - 0.23941/2, x)
         self.assertAlmostEqual(-1, y)
         self.assertAlmostEqual(3, z)
         self.assertAlmostEqual(4 - pi/2, theta)
 
     def test_map_body_to_arm_frame_right(self):
         x, y, z, theta = arm.map_body_to_arm_frame(1, 2, 3, 4, 'right')
-        self.assertAlmostEqual(-2 - 0.1, x)
+        self.assertAlmostEqual(-2 - 0.23941/2, x)
         self.assertAlmostEqual(1, y)
         self.assertAlmostEqual(3, z)
         self.assertAlmostEqual(4 + pi/2, theta)
