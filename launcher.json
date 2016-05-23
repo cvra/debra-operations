@@ -48,7 +48,16 @@
         "command": ["python", "config/config_send.py",
                     "-w",
                     "config/config-left-arm.yaml"],
-        "depends": ["Master Node"],
-        "dependency forces restart": true
+        "depends": ["Master Node", "Right Arm Parameters"],
+        "dependency forces restart": true,
+        "delay": 1
+    },
+    "Pump Parameters": {
+        "command": ["python", "config/config_send.py",
+                    "-w",
+                    "config/config-pumps.yaml"],
+        "depends": ["Master Node", "Left Arm Parameters"],
+        "dependency forces restart": true,
+        "delay": 1
     }
 }

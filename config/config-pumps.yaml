@@ -1,0 +1,32 @@
+actuator:
+    left-pump-1:
+        motor:
+            mode: 3 # bounded
+    left-pump-2:
+        motor:
+            mode: 3 # bounded
+    left-pump-3:
+        motor:
+            mode: 3 # bounded
+    left-pump-4:
+        motor:
+            mode: 3 # bounded
+    left-pump-5:
+        motor:
+            mode: 3 # bounded
+
+    right-pump-1:
+        motor:
+            mode: 3 # bounded
+    right-pump-2:
+        motor:
+            mode: 3 # bounded
+    right-pump-3:
+        motor:
+            mode: 3 # bounded
+    right-pump-4:
+        motor:
+            mode: 3 # bounded
+    right-pump-5:
+        motor:
+            mode: 3 # bounded
