@@ -16,18 +16,19 @@ class Endstopper:
         self.node = zmqmsgbus.Node(self.bus)
 
     class Actuator:
-        def __init__(self, string_id, velocity_setp):
+        def __init__(self, string_id, velocity_setp, torque_limit):
             self.string_id = string_id
             self.start_time = 0
             self.zero = 0
             self.velocity = 0
-            self.velocity_setp = 0
+            self.velocity_setp = velocity_setp
+            self.torque_limit = torque_limit
             self.was_fast = False
             self.stop = False
 
-    def add(self, actuator_ids, velocity_setp):
+    def add(self, actuator_ids, velocity_setp, torque_limit):
         for actuator_id in actuator_ids:
-            new_actuator = self.Actuator(actuator_id, velocity_setp)
+            new_actuator = self.Actuator(actuator_id, velocity_setp, torque_limit)
             self.actuators.append(new_actuator)
             self.turn_on_feedback_stream(new_actuator)
 
@@ -37,6 +38,9 @@ class Endstopper:
                 {'actuator': {actuator.string_id: {
                     'stream': {
                         'motor_pos':    30
+                    },
+                    'control': {
+                        'torque_limit': 0.2*actuator.torque_limit
                     }
                 }}})
 
@@ -45,6 +49,9 @@ class Endstopper:
                 {'actuator': {actuator.string_id: {
                     'stream': {
                         'motor_pos':    0
+                    },
+                    'control': {
+                        'torque_limit': actuator.torque_limit
                     }
                 }}})
 
@@ -59,7 +66,7 @@ class Endstopper:
         if not actuator.stop:
             self.node.call('/actuator/velocity',
                     [actuator.string_id, actuator.velocity_setp])
-            if velocity < MIN_VELOCITY_PERCENT * actuator.velocity_setp and \
+            if actuator.velocity < MIN_VELOCITY_PERCENT * actuator.velocity_setp and \
                (actuator.was_fast or time.time() - actuator.start_time > MIN_TIME):
                 actuator.stop = True
                 actuator.zero = position
