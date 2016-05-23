@@ -7,6 +7,7 @@ import queue
 import homing_handler
 from math import pi
 import math
+import yaml
 
 
 class Arm:
@@ -23,14 +24,12 @@ class Arm:
                  upper_arm=0.14,
                  forearm=0.052,
                  z_meter_per_rad=0.005/2/pi,
-                 tool_1_angle=pi,
                  tool_distance=0.03,
                  tool_5_distance=0.07,
                  tool_5_z_offset=0.03):
         self.upper_arm = upper_arm
         self.forearm = forearm
         self.z_meter_per_rad = z_meter_per_rad
-        self.tool_1_angle = tool_1_angle
         self.tool_distance = tool_distance
         self.tool_5_distance = tool_5_distance
         self.tool_5_z_offset = tool_5_z_offset
@@ -87,8 +86,8 @@ class Arm:
         if tool not in [1, 2, 3, 4, 5]:
             raise ValueError
 
-        tool_angles = [0, pi/2, pi, 3/2*pi, pi/4]
-        theta_hand = self.tool_1_angle + tool_angles[tool-1]
+        tool_angles = [-pi/4, pi/4, 3/4*pi, -3/4*pi, 0]
+        theta_hand = tool_angles[tool-1]
         if tool == 5:
             x = self.tool_5_distance * math.cos(theta)
             y = self.tool_5_distance * math.sin(theta)
@@ -107,11 +106,15 @@ class Arm:
         return res
 
 
-def actuator_position(node, arm, joints):
-    node.call('/actuator/position', [arm + '-shoulder', -joints['shoulder']])
-    node.call('/actuator/position', [arm + '-elbow', -joints['elbow']])
-    node.call('/actuator/position', [arm + '-wrist', joints['wrist']])
-    node.call('/actuator/position', [arm + '-z', joints['z']])
+def actuator_position(node, arm, joints, offsets):
+    node.call('/actuator/position',
+              [arm + '-shoulder', -1*(joints['shoulder'] + offsets[arm + '-shoulder'])])
+    node.call('/actuator/position',
+              [arm + '-elbow', -1*(joints['elbow'] + offsets[arm + '-elbow'])])
+    node.call('/actuator/position',
+              [arm + '-wrist', joints['wrist'] + offsets[arm + '-wrist']])
+    node.call('/actuator/position',
+              [arm + '-z', joints['z'] + offsets[arm + '-z']])
 
 
 def main():
@@ -121,12 +124,30 @@ def main():
 
     time.sleep(1)
 
+    offsets = yaml.load(open(sys.argv[1]))
+    left_arm_config = yaml.load(open("config/config-left-arm.yaml"))
+    right_arm_config = yaml.load(open("config/config-right-arm.yaml"))
+
     l = Arm()
+    r = Arm()
+
+    endstopper = homing_handler.Endstopper()
+    endstopper.add(['left-z'], 50, left_arm_config['actuator']['left-z']['control']['torque_limit'])
+    endstopper.add(['right-z'], 50, right_arm_config['actuator']['right-z']['control']['torque_limit'])
+    l.set_zeros({a[len('left-'):]: z for a, z in endstopper.start().items() if 'left-' in a})
+    r.set_zeros({a[len('right-'):]: z for a, z in endstopper.start().items() if 'right-' in a})
 
     indexer = homing_handler.Indexer()
     indexer.add(['left-shoulder', 'left-elbow', 'left-wrist'])
-    l.set_zeros(indexer.start())
-    l.set_zeros({'z': -0.21/(0.005/2/pi)})
+    indexer.add(['right-shoulder', 'right-elbow', 'right-wrist'])
+    l.set_zeros({a[len('left-'):]: z for a, z in indexer.start().items() if 'left-' in a})
+    r.set_zeros({a[len('right-'):]: z for a, z in indexer.start().items() if 'right-' in a})
+
+    l.move_hand(0.192, 0, 0.18, 0)
+    r.move_hand(0.192, 0, 0.18, 0)
+
+    actuator_position(node, 'left', l.get_actuators(), offsets)
+    actuator_position(node, 'right', r.get_actuators(), offsets)
 
     while True:
         try:
@@ -135,7 +156,18 @@ def main():
                 l.move_hand(*[float(v) for v in setpoint[1:]])
             else:
                 l.move_tcp(int(setpoint[0]), *[float(v) for v in setpoint[1:]])
-            actuator_position(node, 'left', l.get_actuators())
+            actuator_position(node, 'left', l.get_actuators(), offsets)
+        except queue.Empty:
+            pass
+        except ValueError as e:
+            print(e)
+        try:
+            setpoint = node.recv('/right-arm/setpoint')
+            if setpoint[0] == 0:
+                r.move_hand(*[float(v) for v in setpoint[1:]])
+            else:
+                r.move_tcp(int(setpoint[0]), *[float(v) for v in setpoint[1:]])
+            actuator_position(node, 'right', r.get_actuators(), offsets)
         except queue.Empty:
             pass
         except ValueError as e:

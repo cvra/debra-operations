@@ -38,28 +38,28 @@ class TestArm(unittest.TestCase):
         self.assertEqual(list(a.get_actuators().values()), [1, 2, 3, 4])
 
     def test_get_tcp_1_offset(self):
-        a = arm.Arm(1, 1, 1, pi/2, 1, 2, 1)
+        a = arm.Arm(1, 1, 1, 1, 2, 1)
         theta = pi/2
         x, y, z, theta_hand = a.get_tcp_offset(tool=1, theta=theta)
-        self.assertAlmostEqual(pi/2, theta_hand)
+        self.assertAlmostEqual(-pi/4, theta_hand)
         self.assertAlmostEqual(1 * math.cos(theta), x)
         self.assertAlmostEqual(1 * math.sin(theta), y)
         self.assertAlmostEqual(0, z)
 
     def test_get_tcp_2_offset(self):
-        a = arm.Arm(1, 1, 1, pi/2, 1, 2, 1)
+        a = arm.Arm(1, 1, 1, 1, 2, 1)
         theta = pi/2
         x, y, z, theta_hand = a.get_tcp_offset(tool=2, theta=theta)
-        self.assertAlmostEqual(pi/2 + pi/2, theta_hand)
+        self.assertAlmostEqual(pi/4, theta_hand)
         self.assertAlmostEqual(1 * math.cos(theta), x)
         self.assertAlmostEqual(1 * math.sin(theta), y)
         self.assertAlmostEqual(0, z)
 
     def test_get_tcp_4_offset(self):
-        a = arm.Arm(1, 1, 1, pi/2, 1, 2, 1)
+        a = arm.Arm(1, 1, 1, 1, 2, 1)
         theta = pi/2
         x, y, z, theta_hand = a.get_tcp_offset(tool=4, theta=theta)
-        self.assertAlmostEqual(pi/2 + 3/2*pi, theta_hand)
+        self.assertAlmostEqual(-3/4*pi, theta_hand)
         self.assertAlmostEqual(1 * math.cos(theta), x)
         self.assertAlmostEqual(1 * math.sin(theta), y)
         self.assertAlmostEqual(0, z)
@@ -70,10 +70,10 @@ class TestArm(unittest.TestCase):
             a.move_tcp(42, 0, 0, 0, 0)
 
     def test_get_tcp_5_offset(self):
-        a = arm.Arm(1, 1, 1, pi/2, 1, 2, 1)
+        a = arm.Arm(1, 1, 1, 1, 2, 1)
         theta = pi/2
         x, y, z, theta_hand = a.get_tcp_offset(tool=5, theta=theta)
-        self.assertAlmostEqual(pi/2 + pi/4, theta_hand)
+        self.assertAlmostEqual(0, theta_hand)
         self.assertAlmostEqual(2 * math.cos(theta), x)
         self.assertAlmostEqual(2 * math.sin(theta), y)
         self.assertAlmostEqual(1, z)
