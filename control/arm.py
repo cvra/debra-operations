@@ -3,34 +3,55 @@ import time
 from arm_trajectories import scara
 from collections import OrderedDict
 import sys
-
+import homing_handler
+from math import pi
 
 class Arm:
-    def __init__(self, upper_arm=2, forearm=1):
+    def __init__(self, upper_arm=0.14, forearm=0.052, z_meter_per_rad=0.005/2/pi):
         self.upper_arm = upper_arm
         self.forearm = forearm
+        self.z_meter_per_rad = z_meter_per_rad
         self.joints = OrderedDict([('z', 0),
                                    ('shoulder', 0),
                                    ('elbow', 0),
                                    ('wrist', 0)])
-        self.joint_limits = OrderedDict([('z', (0, 250)),
+        self.joint_limits = OrderedDict([('z', (0, 0.21)),
                                    ('shoulder', (-2.1, 2.1)),
                                    ('elbow', (-2.2, 2.2)),
                                    ('wrist', (-float('inf'), float('inf')))])
+        self.zeros = OrderedDict([('z', 0),
+                                   ('shoulder', 0),
+                                   ('elbow', 0),
+                                   ('wrist', 0)])
+
+    def set_zeros(self, zeros):
+        for actuator in zeros:
+            self.zeros[actuator] = zeros[actuator]
 
     def get_hand_position(self):
-        xy = scara.forward_kinematics([self.joints['shoulder'], self.joints['elbow']], self.upper_arm, self.forearm)
-        return xy + (self.joints['z'], )
+        return scara.forward_kinematics([self.joints['shoulder'],
+                                         self.joints['elbow'],
+                                         self.joints['z']],
+                                        self.upper_arm,
+                                        self.forearm,
+                                        self.z_meter_per_rad)
 
     def move_hand(self, x, y, z):
-        limits = [self.joint_limits['shoulder'], self.joint_limits['elbow']]
-        shoulder, elbow = scara.inverse_kinematics([x, y], self.upper_arm, self.forearm, limits)
+        limits = [self.joint_limits['shoulder'], self.joint_limits['elbow'], self.joint_limits['z']]
+        shoulder, elbow, z_actuator = scara.inverse_kinematics([x, y, z],
+                                                               self.upper_arm,
+                                                               self.forearm,
+                                                               self.z_meter_per_rad,
+                                                               limits)
         self.joints['shoulder'] = shoulder
         self.joints['elbow'] = elbow
-        self.joints['z'] = z
+        self.joints['z'] = z_actuator
 
     def get_actuators(self):
-        return self.joints
+        res = self.joints.copy()
+        for actuator in res:
+            res[actuator] = res[actuator] + self.zeros[actuator]
+        return res
 
 
 def actuator_position(node, arm, joints):
@@ -49,8 +70,15 @@ def main():
 
     l = Arm()
 
-    l.move_hand(float(sys.argv[1]), float(sys.argv[2]), 200)
-    actuator_position(node, 'left', l.get_actuators())
+    indexer = homing_handler.Indexer()
+    indexer.add(['left-shoulder', 'left-elbow', 'left-wrist'])
+    l.set_zeros(indexer.start())
+    l.set_zeros({'z': -0.21/(0.005/2/pi)})
+
+    while True:
+        hand = node.recv('/left-arm/hand/setpoint')
+        l.move_hand(*[float(v) for v in hand])
+        actuator_position(node, 'left', l.get_actuators())
 
 
 if __name__ == '__main__':
