@@ -109,13 +109,21 @@ class Arm:
 
 def actuator_position(node, arm, joints, offsets):
     node.call('/actuator/position',
-              [arm + '-shoulder', -1*(joints['shoulder'] + offsets[arm + '-shoulder'])])
+              [arm + '-shoulder',
+               offsets[arm + '-shoulder-dir']
+               * (joints['shoulder'] + offsets[arm + '-shoulder'])])
     node.call('/actuator/position',
-              [arm + '-elbow', -1*(joints['elbow'] + offsets[arm + '-elbow'])])
+              [arm + '-elbow',
+               offsets[arm + '-elbow-dir']
+               * (joints['elbow'] + offsets[arm + '-elbow'])])
     node.call('/actuator/position',
-              [arm + '-wrist', joints['wrist'] + offsets[arm + '-wrist']])
+              [arm + '-wrist',
+               offsets[arm + '-wrist-dir']
+               * (joints['wrist'] + offsets[arm + '-wrist'])])
     node.call('/actuator/position',
-              [arm + '-z', joints['z'] + offsets[arm + '-z']])
+              [arm + '-z',
+               offsets[arm + '-z-dir']
+               * (joints['z'] + offsets[arm + '-z'])])
 
 
 def map_body_to_arm_frame(x, y, z, theta, arm):
@@ -143,14 +151,16 @@ def main():
     endstopper = homing_handler.Endstopper()
     endstopper.add(['left-z'], 50, left_arm_config['actuator']['left-z']['control']['torque_limit'])
     endstopper.add(['right-z'], 50, right_arm_config['actuator']['right-z']['control']['torque_limit'])
-    l.set_zeros({a[len('left-'):]: z for a, z in endstopper.start().items() if 'left-' in a})
-    r.set_zeros({a[len('right-'):]: z for a, z in endstopper.start().items() if 'right-' in a})
+    endstopper_zeros = endstopper.start()
+    l.set_zeros({a[len('left-'):]: z * offsets[a + '-dir'] for a, z in endstopper_zeros.items() if 'left-' in a})
+    r.set_zeros({a[len('right-'):]: z * offsets[a + '-dir'] for a, z in endstopper_zeros.items() if 'right-' in a})
 
     indexer = homing_handler.Indexer()
     indexer.add(['left-shoulder', 'left-elbow', 'left-wrist'])
     indexer.add(['right-shoulder', 'right-elbow', 'right-wrist'])
-    l.set_zeros({a[len('left-'):]: z for a, z in indexer.start().items() if 'left-' in a})
-    r.set_zeros({a[len('right-'):]: z for a, z in indexer.start().items() if 'right-' in a})
+    indexer_zeros = indexer.start()
+    l.set_zeros({a[len('left-'):]: z * offsets[a + '-dir'] for a, z in indexer_zeros.items() if 'left-' in a})
+    r.set_zeros({a[len('right-'):]: z * offsets[a + '-dir'] for a, z in indexer_zeros.items() if 'right-' in a})
 
     l.move_hand(0.192, 0, 0.18, 0)
     r.move_hand(0.192, 0, 0.18, 0)
