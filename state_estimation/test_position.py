@@ -49,3 +49,9 @@ class TestPosition(unittest.TestCase):
         odometry_pos = [4, 5, 6]
         offset = position.compute_odometry_offset(table_pos, odometry_pos)
         np.testing.assert_almost_equal(table_pos, position.map_odometry_to_table(odometry_pos, offset))
+
+    def test_position_estimator_reset_and_get_position(self):
+        p = position.PositionEstimator()
+        p.update_odometry([3, 4, 5])
+        p.reset([1, 2, 3])
+        np.testing.assert_almost_equal([1, 2, 3], p.get_position())

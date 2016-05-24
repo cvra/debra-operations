@@ -64,30 +64,32 @@ class PositionEstimator():
 
     def __init__(self):
         self.position_odometry = np.array([0.0, 0.0, 0.0])
-        self.x = np.matrix([0.0, 0.0, 0.0]) # position and heading offset
-        self.P = np.matrix(np.diagonal([0.1, 0.1, 0.1]))
+        self.x = np.matrix([0.0, 0.0, 0.0]).T # position and heading offset
+        self.P = np.matrix(np.diag([0.1, 0.1, 0.1]))
 
     def update_odometry(self, odometry):
         self.position_odometry = np.array(odometry)
 
     def reset(self, pos=[0, 0, 0]):
-        self.x = np.matrix(compute_odometry_offset(pos, self.position_odometry))
+        self.x = np.matrix(compute_odometry_offset(pos, self.position_odometry)).T
 
     def update_lidar(self, robot_position):
         # state propagation x_k+1 = x_k + n
-        Q = np.matrix(np.diagonal([0.001, 0.001, 0.001]))
+        Q = np.matrix(np.diag([0.001, 0.001, 0.001]))
         self.P = kalman_state_propagation(self.P, np.eye(3), Q)
         # measurement update
-        z = np.matrix(robot_position)
-        h_of_x = np.matrix(map_odometry_to_table(self.position_odometry, self.x))
+        z = np.matrix(robot_position).T
+        print(z)
+        h_of_x = np.matrix(map_odometry_to_table(self.position_odometry, self.x.T.tolist()[0])).T
+        print(h_of_x)
         H = np.matrix([[1, 0, -sin(self.x[2])*self.position_odometry[0]-cos(self.x[2])*self.position_odometry[1]],
                        [0, 1, cos(self.x[2])*self.position_odometry[0]-sin(self.x[2])*self.position_odometry[1]],
                        [0, 0, 1]])
-        R = np.matrix(np.diagonal([0.03, 0.03, 0.05]))
+        R = np.matrix(np.diag([0.03, 0.03, 0.05]))
         self.x, self.P = kalman_measurement_update(self.x, self.P, z, h_of_x, H, R)
 
     def get_position(self):
-        return map_odometry_to_table(self.position_odometry, self.x)
+        return map_odometry_to_table(self.position_odometry, self.x.T.tolist()[0])
 
 
 def main():
@@ -98,7 +100,7 @@ def main():
     pose = PositionEstimator()
     o = node.recv('/odometry_raw')
     pose.update_odometry(o)
-    pose.reset([0.5, 0.5], np.pi / 2)
+    pose.reset([0.5, 0.5, np.pi/2])
 
     while True:
         try:
