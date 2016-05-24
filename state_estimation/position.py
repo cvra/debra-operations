@@ -54,7 +54,7 @@ def main():
     pose = PositionEstimator()
     o = node.recv('/odometry_raw')
     pose.update_odometry(o)
-    pose.reset([0.5, 0.5], 0)
+    pose.reset([0.5, 0.5], np.pi / 2)
 
     while True:
         try:
