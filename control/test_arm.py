@@ -102,3 +102,11 @@ class TestArm(unittest.TestCase):
         self.assertAlmostEqual(1, y)
         self.assertAlmostEqual(3, z)
         self.assertAlmostEqual(4 + pi/2, theta)
+
+    def test_map_table_to_body_frame(self):
+        robot_pos = [1, 2, pi/2]    # x, y, heading
+        x, y, z, theta = arm.map_table_to_body_frame(1.1, 2.15, 0.1, 3/4*pi, robot_pos)
+        self.assertAlmostEqual(0.15, x)
+        self.assertAlmostEqual(-0.1, y)
+        self.assertAlmostEqual(0.1, z)
+        self.assertAlmostEqual(pi/4, theta)

@@ -1,5 +1,6 @@
 import zmqmsgbus
 import time
+import threading
 from arm_trajectories import scara
 from collections import OrderedDict
 import sys
@@ -22,7 +23,7 @@ class Arm:
 
     def __init__(self,
                  upper_arm=0.14,
-                 forearm=0.052,
+                 forearm=0.072,
                  z_meter_per_rad=0.005/2/pi,
                  tool_distance=0.041,
                  tool_5_distance=0.069,
@@ -133,6 +134,43 @@ def map_body_to_arm_frame(x, y, z, theta, arm):
     if arm == 'right':
         return -y - SHOULDER_POSITION, x, z, theta + pi/2
 
+def map_table_to_body_frame(x, y, z, theta, robot_pos):
+    delta_x = x - robot_pos[0]
+    delta_y = y - robot_pos[1]
+    heading = robot_pos[2]
+    theta = theta - heading
+    body_x = math.cos(heading) * delta_x + math.sin(heading) * delta_y
+    body_y = -math.sin(heading) * delta_x + math.cos(heading) * delta_y
+    return body_x, body_y, z, theta
+
+def table_position_control_thread():
+    bus = zmqmsgbus.Bus(sub_addr='ipc://ipc/source',
+                        pub_addr='ipc://ipc/sink')
+    node = zmqmsgbus.Node(bus)
+
+    time.sleep(1)
+    # dont' start before robot position was acquired at least once
+    robot_pos = node.recv('/position')
+
+    while True:
+        try:
+            robot_pos = node.recv('/position', timeout=0)
+        except queue.Empty:
+            pass
+        try:
+            setpoint = node.recv('/left-arm/table-setpoint', timeout=0)
+            setpoint = [int(setpoint[0])] + map_table_to_body_frame(*setpoint[1:], robot_pos=robot_pos)
+            node.publish('/left-arm/setpoint', setpoint)
+        except queue.Empty:
+            pass
+        try:
+            setpoint = node.recv('/right-arm/table-setpoint', timeout=0)
+            setpoint = [int(setpoint[0])] + map_table_to_body_frame(*setpoint[1:], robot_pos=robot_pos)
+            node.publish('/right-arm/setpoint', setpoint)
+        except queue.Empty:
+            pass
+        time.sleep(0.01)
+
 
 def main():
     bus = zmqmsgbus.Bus(sub_addr='ipc://ipc/source',
@@ -167,6 +205,9 @@ def main():
 
     actuator_position(node, 'left', l.get_actuators(), offsets)
     actuator_position(node, 'right', r.get_actuators(), offsets)
+
+    table_pos_control = threading.Thread(target=table_position_control_thread)
+    table_pos_control.start()
 
     while True:
         try:
