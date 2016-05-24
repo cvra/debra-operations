@@ -6,6 +6,7 @@ from collections import OrderedDict
 import sys
 import queue
 import homing_handler
+import cst_vel_homing
 from math import pi
 import math
 import yaml
@@ -193,15 +194,27 @@ def main():
     l.set_zeros({a[len('left-'):]: z * offsets[a + '-dir'] for a, z in endstopper_zeros.items() if 'left-' in a})
     r.set_zeros({a[len('right-'):]: z * offsets[a + '-dir'] for a, z in endstopper_zeros.items() if 'right-' in a})
 
-    indexer = homing_handler.Indexer()
-    indexer.add(['left-shoulder', 'left-elbow', 'left-wrist'])
-    indexer.add(['right-shoulder', 'right-elbow', 'right-wrist'])
-    indexer_zeros = indexer.start()
-    l.set_zeros({a[len('left-'):]: z * offsets[a + '-dir'] for a, z in indexer_zeros.items() if 'left-' in a})
-    r.set_zeros({a[len('right-'):]: z * offsets[a + '-dir'] for a, z in indexer_zeros.items() if 'right-' in a})
+    # indexer = homing_handler.Indexer()
+    # indexer.add(['left-shoulder', 'left-elbow', 'left-wrist'])
+    # indexer.add(['right-shoulder', 'right-elbow', 'right-wrist'])
+    # indexer_zeros = indexer.start()
+    # l.set_zeros({a[len('left-'):]: z * offsets[a + '-dir'] for a, z in indexer_zeros.items() if 'left-' in a})
+    # r.set_zeros({a[len('right-'):]: z * offsets[a + '-dir'] for a, z in indexer_zeros.items() if 'right-' in a})
+    l.set_zeros({'shoulder': cst_vel_homing.homing('left-shoulder', 1)
+                                  * offsets['left-shoulder-dir']})
+    l.set_zeros({'elbow': cst_vel_homing.homing('left-elbow', 1)
+                                  * offsets['left-elbow-dir']})
+    l.set_zeros({'wrist': cst_vel_homing.homing('left-wrist', 2, periodic=True)
+                                  * offsets['left-wrist-dir']})
+    r.set_zeros({'shoulder': cst_vel_homing.homing('right-shoulder', 1)
+                                  * offsets['right-shoulder-dir']})
+    r.set_zeros({'elbow': cst_vel_homing.homing('right-elbow', 1)
+                                  * offsets['right-elbow-dir']})
+    r.set_zeros({'wrist': cst_vel_homing.homing('right-wrist', 2, periodic=True)
+                                  * offsets['right-wrist-dir']})
 
-    l.move_hand(0.192, 0, 0.18, 0)
-    r.move_hand(0.192, 0, 0.18, 0)
+    l.move_hand(0.212, 0, 0.18, 0)
+    r.move_hand(0.212, 0, 0.18, 0)
 
     actuator_position(node, 'left', l.get_actuators(), offsets)
     actuator_position(node, 'right', r.get_actuators(), offsets)
@@ -230,6 +243,7 @@ def main():
             else:
                 r.move_tcp(*setpoint)
             actuator_position(node, 'right', r.get_actuators(), offsets)
+            print(r.get_actuators())
         except queue.Empty:
             pass
         except ValueError as e:
