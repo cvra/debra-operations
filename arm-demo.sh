@@ -1,5 +1,7 @@
 #!/bin/bash
 
+python comm/call.py /actuator/velocity "[right-wheel, 0]"
+python comm/call.py /actuator/velocity "[left-wheel, 0]"
 python comm/publish.py /right-arm/setpoint "[0, 0.12, -0.0, 0.18, 1.67]"
 sleep 1
 python comm/publish.py /right-arm/setpoint "[0, 0.075, -0.0, 0.18, 1.67]"
@@ -11,7 +13,7 @@ sleep 0.5
 python comm/publish.py /right-arm/setpoint "[0, 0.075, -0.0, 0.18, 1.67]"
 sleep 0.5
 python comm/publish.py /right-arm/setpoint "[0, 0.12, -0.0, 0.18, 1.67]"
-sleep 0.5
+sleep 1
 python comm/publish.py /right-arm/setpoint "[0, 0.12, -0.12, 0.18, 1.67]"
 sleep 1
 python comm/publish.py /right-arm/setpoint "[2, 0, -0.25, 0.18, 0]"
