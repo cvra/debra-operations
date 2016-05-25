@@ -83,3 +83,26 @@ class ObstacleAvoidanceTest(unittest.TestCase):
         self.assertFalse(wp.obstacle_avoidance_robot_should_stop(p, t, [[0.5, 0.5]]))
         self.assertTrue(wp.obstacle_avoidance_robot_should_stop(p, t, [[0.1, 0.1]]))
         self.assertFalse(wp.obstacle_avoidance_robot_should_stop(p, t, [[-0.1, 0.1]]))
+
+class ObstaclesTest(unittest.TestCase):
+    def test_can_set_and_get(self):
+        l = wp.ObstacleList()
+        l.add([1,2], 1234)
+        ob = l.get(1234)[0]
+        self.assertEqual(ob, [1,2])
+
+    def test_can_detect_old(self):
+        l = wp.ObstacleList()
+        l.add([1,2], 0)
+        l.add([3,4], wp.OBSTACLE_TIMEOUT + 1)
+        ob = l.get(wp.OBSTACLE_TIMEOUT + 1)
+        self.assertEqual(ob[0], [3,4])
+
+    def test_can_get_more_than_once(self):
+        l = wp.ObstacleList()
+        l.add([1,2], 0)
+        l.add([3,4], wp.OBSTACLE_TIMEOUT + 1)
+        ob = l.get(wp.OBSTACLE_TIMEOUT + 1)
+        self.assertEqual(ob[0], [3,4])
+        ob = l.get(wp.OBSTACLE_TIMEOUT + 1)
+        self.assertEqual(ob[0], [3,4])

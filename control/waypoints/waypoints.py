@@ -6,7 +6,8 @@ import time
 import copy
 from threading import Lock
 
-OBSTACLE_MIN_DISTANCE = 0.7 # [m]
+OBSTACLE_MIN_DISTANCE = 0.4 # [m]
+OBSTACLE_TIMEOUT = 0.3 # [s]
 
 class RobotPose:
     def __init__(self, xy, theta):
@@ -138,18 +139,35 @@ def obstacle_avoidance_robot_should_stop(robot_pos, target, obstacles):
     return False
 
 
-class ObstaclesList:
+
+class ObstacleList:
+    class Obstacle:
+        def __init__(self, pos, time):
+            self.pos = pos
+            self.time = time
+
     def __init__(self):
         self.lock = Lock()
         self.lst = []
 
-    def set(self, lst):
+    def add(self, xy, now):
         with self.lock:
-            self.lst = copy.copy(lst)
+            o = self.Obstacle(copy.copy(xy), now)
+            self.lst.append(o)
 
-    def get(self):
+    def remove_old(self, now):
         with self.lock:
-            return copy.copy(self.lst)
+            for ob in self.lst:
+                if ob.time + OBSTACLE_TIMEOUT < now:
+                    self.lst.remove(ob)
+
+    def get(self, now):
+        self.remove_old(now)
+        lst = list()
+        with self.lock:
+            for o in self.lst:
+                lst.append(copy.copy(o.pos))
+            return lst
 
 def odometry_msg_handler(pose, topic, msg):
     x, y, theta = msg
@@ -166,11 +184,12 @@ def main():
                         pub_addr='ipc://ipc/sink')
     node = zmqmsgbus.Node(bus)
 
-    obstacles = ObstaclesList()
+    obstacle_list = ObstacleList()
     pose = RobotPose(xy=[0,0],theta=0)
     handler = lambda topic, msg: odometry_msg_handler(pose, topic, msg)
     node.register_message_handler('/position', handler)
-    node.register_message_handler('/obstacles', lambda topic, msg: obstacles.set(msg))
+    handler = lambda topic, msg: obstacle_list.add(msg, time.time())
+    node.register_message_handler('/obstacle', handler)
 
     time.sleep(1)
 
@@ -189,7 +208,8 @@ def main():
     while True:
         v_left, v_right = waypoint.process(pose, target)
 
-        if obstacle_avoidance_robot_should_stop(pose, target, obstacles.get()):
+        obstacles = obstacle_list.get(time.time())
+        if obstacle_avoidance_robot_should_stop(pose, target, obstacles):
             v_left, v_right = 0, 0
 
         node.call('/actuator/velocity', ['left-wheel', -v_left]) # left wheel velocity inversed
