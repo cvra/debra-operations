@@ -79,9 +79,7 @@ class PositionEstimator():
         self.P = kalman_state_propagation(self.P, np.eye(3), Q)
         # measurement update
         z = np.matrix(robot_position).T
-        print(z)
         h_of_x = np.matrix(map_odometry_to_table(self.position_odometry, self.x.T.tolist()[0])).T
-        print(h_of_x)
         H = np.matrix([[1, 0, -sin(self.x[2])*self.position_odometry[0]-cos(self.x[2])*self.position_odometry[1]],
                        [0, 1, cos(self.x[2])*self.position_odometry[0]-sin(self.x[2])*self.position_odometry[1]],
                        [0, 0, 1]])
@@ -111,8 +109,12 @@ def main():
             pass
         try:
             l = node.recv('/lidar/position', timeout=0)
-            pose.update_lidar(get_robot_position_from_lidar(l))
-            node.publish('/position', pose.get_position())
+            robot_position_lidar = get_robot_position_from_lidar(l)
+            robot_position_kalman = pose.get_position()
+            if (np.linalg.norm(np.array(robot_position_lidar[0:2]) - np.array(robot_position_kalman[0:2])) < 0.2
+                and abs(periodic_error(robot_position_lidar[2] - robot_position_kalman[2])) < 0.1):
+                pose.update_lidar(robot_position_lidar)
+                node.publish('/position', pose.get_position())
         except queue.Empty:
             pass
         time.sleep(0.01)
