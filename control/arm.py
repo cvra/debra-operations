@@ -160,13 +160,13 @@ def table_position_control_thread():
             pass
         try:
             setpoint = node.recv('/left-arm/table-setpoint', timeout=0)
-            setpoint = [int(setpoint[0])] + map_table_to_body_frame(*setpoint[1:], robot_pos=robot_pos)
+            setpoint = [int(setpoint[0])] + list(map_table_to_body_frame(*setpoint[1:], robot_pos=robot_pos))
             node.publish('/left-arm/setpoint', setpoint)
         except queue.Empty:
             pass
         try:
             setpoint = node.recv('/right-arm/table-setpoint', timeout=0)
-            setpoint = [int(setpoint[0])] + map_table_to_body_frame(*setpoint[1:], robot_pos=robot_pos)
+            setpoint = [int(setpoint[0])] + list(map_table_to_body_frame(*setpoint[1:], robot_pos=robot_pos))
             node.publish('/right-arm/setpoint', setpoint)
         except queue.Empty:
             pass
