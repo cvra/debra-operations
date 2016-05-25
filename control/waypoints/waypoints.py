@@ -89,17 +89,17 @@ class WayPoint:
     def __init__(self):
         self.frequency = 50 # [Hz]
         self.min_distance_error = 0.05 # [m]
-        self.waypoints_speed = 0.1 # [m/s]
-        self.rotation_speed = 1 # [rad/s]
-        self.heading_pid = PID(kp=10,ki=0.5,kd=0.1,ilimit=0,freq=self.frequency)
-        self.distance_pid = PID(kp=250,ki=0,kd=0,ilimit=0,freq=self.frequency)
-        self.heading_error_large = binaryHysteresis(activate=0.2, deactivate=0.1)
+        self.waypoints_distance_limit = 0.4 # [m]
+        self.rotation_speed = 0.5 # [rad/s]
+        self.heading_pid = PID(kp=15,ki=0.,kd=1,ilimit=0,freq=self.frequency)
+        self.distance_pid = PID(kp=80,ki=0,kd=10,ilimit=0,freq=self.frequency)
+        self.heading_error_large = binaryHysteresis(activate=0.4, deactivate=0.1)
 
     def error(self, pose, target):
         bearing_to_wp = pose.abs_bearing_to(target)
         heading_error = periodic_error(pose.theta - bearing_to_wp)
         distance_error = -pose.forward_distance_to(target)
-        distance_error = limit(distance_error, -self.waypoints_speed, self.waypoints_speed)
+        distance_error = limit(distance_error, -self.waypoints_distance_limit, self.waypoints_distance_limit)
 
         if pose.distance_to(target) > self.min_distance_error:
             if self.heading_error_large.evaluate(abs(heading_error)):
