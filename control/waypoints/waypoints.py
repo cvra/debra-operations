@@ -3,7 +3,10 @@ import argparse
 import math
 import numpy as np
 import time
+import copy
+from threading import Lock
 
+OBSTACLE_MIN_DISTANCE = 0.7 # [m]
 
 class RobotPose:
     def __init__(self, xy, theta):
@@ -122,6 +125,18 @@ class WayPoint:
         v_right = dist_ctrl + head_ctrl
         return [v_left, v_right]
 
+class ObstaclesList:
+    def __init__(self):
+        self.lock = Lock()
+        self.lst = []
+
+    def set(self, lst):
+        with self.lock:
+            self.lst = copy.copy(lst)
+
+    def get(self):
+        with self.lock:
+            return copy.copy(self.lst)
 
 def odometry_msg_handler(pose, topic, msg):
     x, y, theta = msg
@@ -138,9 +153,11 @@ def main():
                         pub_addr='ipc://ipc/sink')
     node = zmqmsgbus.Node(bus)
 
+    obstacles = ObstaclesList()
     pose = RobotPose(xy=[0,0],theta=0)
     handler = lambda topic, msg: odometry_msg_handler(pose, topic, msg)
     node.register_message_handler('/position', handler)
+    node.register_message_handler('/obstacles', lambda topic, msg: obstacles.set(msg))
 
     time.sleep(1)
 
@@ -158,6 +175,10 @@ def main():
 
     while True:
         v_left, v_right = waypoint.process(pose, target)
+        for xy in obstacles.get():
+            if np.linalg.norm(pose.xy - np.array(xy)) < OBSTACLE_MIN_DISTANCE:
+                v_left, v_right = 0, 0
+
         node.call('/actuator/velocity', ['left-wheel', -v_left]) # left wheel velocity inversed
         node.call('/actuator/velocity', ['right-wheel', v_right])
         time.sleep(1/waypoint.frequency)
