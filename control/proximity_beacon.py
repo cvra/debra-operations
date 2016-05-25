@@ -7,7 +7,7 @@ import queue
 import copy
 from threading import Lock
 
-HEADING_OFFSET = math.pi/2
+HEADING_OFFSET = -math.pi/2
 REFLECTOR_DIAMETER = 79e-3
 PUBLSIH_FREQUENCY = 5
 MAX_NB_SIGNALS = 6
