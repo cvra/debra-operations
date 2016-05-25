@@ -3,14 +3,11 @@ import zmqmsgbus
 import unittest
 import math
 import time
-import queue
 import copy
 from threading import Lock
 
 HEADING_OFFSET = -math.pi/2
 REFLECTOR_DIAMETER = 79e-3
-PUBLSIH_FREQUENCY = 5
-MAX_NB_SIGNALS = 6
 
 def relative_heading_and_distance(start, length):
     if start < 0 or start > 2*math.pi or length <= 0 or length > 2*math.pi:
@@ -27,12 +24,12 @@ def relative_to_global_position(x, y, theta, dist, angle):
     y += dist * math.sin(theta + angle)
     return [x, y]
 
-def proximity_beacon_msg(queue, position, msg):
+def proximity_beacon_msg(node, position, msg):
     start, length = msg
     angle, dist = relative_heading_and_distance(start, length)
     x, y, theta = position.get()
     pos = relative_to_global_position(x, y, theta, dist, angle)
-    queue.put(pos)
+    node.publish('/obstacle', pos)
 
 class PositionObject:
     def __init__(self, init=[0,0,0]):
@@ -47,42 +44,19 @@ class PositionObject:
         with self.lock:
             self.position = copy.copy(position)
 
-class SignalQueue:
-    def __init__(self):
-        self.q = queue.Queue(MAX_NB_SIGNALS)
-        self.lock = Lock()
-
-    def put(self, pos):
-        with self.lock:
-            try:
-                self.q.put_nowait(pos)
-            except queue.Full:
-                pass # drop data, should never happen
-
-    def get(self):
-        with self.lock:
-            l = list()
-            try:
-                while True:
-                    l.append(self.q.get_nowait())
-            except queue.Empty:
-                return l
-
 def main():
     bus = zmqmsgbus.Bus(sub_addr='ipc://ipc/source',
                         pub_addr='ipc://ipc/sink')
     node = zmqmsgbus.Node(bus)
 
     position = PositionObject()
-    queue = SignalQueue()
     handler = lambda topic, msg: position.set(msg)
     node.register_message_handler('/position', handler)
-    handler = lambda topic, msg: proximity_beacon_msg(queue, position, msg)
+    handler = lambda topic, msg: proximity_beacon_msg(node, position, msg)
     node.register_message_handler('/proximity_beacon', handler)
 
     while True:
-        time.sleep(1/PUBLSIH_FREQUENCY)
-        node.publish('/obstacles', queue.get())
+        time.sleep(1)
 
 if __name__ == '__main__':
     main()
