@@ -184,35 +184,39 @@ def main():
     left_arm_config = yaml.load(open("config/config-left-arm.yaml"))
     right_arm_config = yaml.load(open("config/config-right-arm.yaml"))
 
+    arm_lock = threading.Lock()
     l = Arm(negative_elbow_angle=True)
     r = Arm()
 
-    endstopper = homing_handler.Endstopper()
-    endstopper.add(['left-z'], 50, left_arm_config['actuator']['left-z']['control']['torque_limit'])
-    endstopper.add(['right-z'], 50, right_arm_config['actuator']['right-z']['control']['torque_limit'])
-    endstopper_zeros = endstopper.start()
-    l.set_zeros({a[len('left-'):]: z * offsets[a + '-dir'] for a, z in endstopper_zeros.items() if 'left-' in a})
-    r.set_zeros({a[len('right-'):]: z * offsets[a + '-dir'] for a, z in endstopper_zeros.items() if 'right-' in a})
+    def zero_homing(arg):
+        with arm_lock:
+            endstopper = homing_handler.Endstopper()
+            endstopper.add(['left-z'], 50, left_arm_config['actuator']['left-z']['control']['torque_limit'])
+            endstopper.add(['right-z'], 50, right_arm_config['actuator']['right-z']['control']['torque_limit'])
+            endstopper_zeros = endstopper.start()
+            l.set_zeros({a[len('left-'):]: z * offsets[a + '-dir'] for a, z in endstopper_zeros.items() if 'left-' in a})
+            r.set_zeros({a[len('right-'):]: z * offsets[a + '-dir'] for a, z in endstopper_zeros.items() if 'right-' in a})
 
 
-    l.set_zeros({'shoulder': cst_vel_homing.homing('left-shoulder', 1)
-                                  * offsets['left-shoulder-dir']})
-    l.set_zeros({'elbow': cst_vel_homing.homing('left-elbow', 1)
-                                  * offsets['left-elbow-dir']})
-    l.set_zeros({'wrist': cst_vel_homing.homing('left-wrist', 2, periodic=True)
-                                  * offsets['left-wrist-dir']})
-    r.set_zeros({'shoulder': cst_vel_homing.homing('right-shoulder', 1)
-                                  * offsets['right-shoulder-dir']})
-    r.set_zeros({'elbow': cst_vel_homing.homing('right-elbow', 1)
-                                  * offsets['right-elbow-dir']})
-    r.set_zeros({'wrist': cst_vel_homing.homing('right-wrist', 2, periodic=True)
-                                  * offsets['right-wrist-dir']})
+            l.set_zeros({'shoulder': cst_vel_homing.homing('left-shoulder', 1)
+                                          * offsets['left-shoulder-dir']})
+            l.set_zeros({'elbow': cst_vel_homing.homing('left-elbow', 1)
+                                          * offsets['left-elbow-dir']})
+            l.set_zeros({'wrist': cst_vel_homing.homing('left-wrist', 2, periodic=True)
+                                          * offsets['left-wrist-dir']})
+            r.set_zeros({'shoulder': cst_vel_homing.homing('right-shoulder', 1)
+                                          * offsets['right-shoulder-dir']})
+            r.set_zeros({'elbow': cst_vel_homing.homing('right-elbow', 1)
+                                          * offsets['right-elbow-dir']})
+            r.set_zeros({'wrist': cst_vel_homing.homing('right-wrist', 2, periodic=True)
+                                          * offsets['right-wrist-dir']})
 
-    l.move_hand(0.212, 0, 0.18, 0)
-    r.move_hand(0.212, 0, 0.18, 0)
+            l.move_hand(0.212, 0, 0.18, 0)
+            r.move_hand(0.212, 0, 0.18, 0)
+            actuator_position(node, 'left', l.get_actuators(), offsets)
+            actuator_position(node, 'right', r.get_actuators(), offsets)
 
-    actuator_position(node, 'left', l.get_actuators(), offsets)
-    actuator_position(node, 'right', r.get_actuators(), offsets)
+    node.register_service('/arm/run_zero_homing', zero_homing)
 
     table_pos_control = threading.Thread(target=table_position_control_thread)
     table_pos_control.start()
@@ -220,25 +224,26 @@ def main():
     while True:
         try:
             setpoint = node.recv('/left-arm/setpoint', timeout=0)
-            setpoint = [int(setpoint[0])] + list(map_body_to_arm_frame(*[float(v) for v in setpoint[1:]], arm='left'))
-            if setpoint[0] == 0:
-                l.move_hand(*setpoint[1:])
-            else:
-                l.move_tcp(*setpoint)
-            actuator_position(node, 'left', l.get_actuators(), offsets)
+            with arm_lock:
+                setpoint = [int(setpoint[0])] + list(map_body_to_arm_frame(*[float(v) for v in setpoint[1:]], arm='left'))
+                if setpoint[0] == 0:
+                    l.move_hand(*setpoint[1:])
+                else:
+                    l.move_tcp(*setpoint)
+                actuator_position(node, 'left', l.get_actuators(), offsets)
         except queue.Empty:
             pass
         except ValueError as e:
             print(e)
         try:
             setpoint = node.recv('/right-arm/setpoint', timeout=0)
-            setpoint = [int(setpoint[0])] + list(map_body_to_arm_frame(*[float(v) for v in setpoint[1:]], arm='right'))
-            if setpoint[0] == 0:
-                r.move_hand(*setpoint[1:])
-            else:
-                r.move_tcp(*setpoint)
-            actuator_position(node, 'right', r.get_actuators(), offsets)
-            print(r.get_actuators())
+            with arm_lock:
+                setpoint = [int(setpoint[0])] + list(map_body_to_arm_frame(*[float(v) for v in setpoint[1:]], arm='right'))
+                if setpoint[0] == 0:
+                    r.move_hand(*setpoint[1:])
+                else:
+                    r.move_tcp(*setpoint)
+                actuator_position(node, 'right', r.get_actuators(), offsets)
         except queue.Empty:
             pass
         except ValueError as e:
