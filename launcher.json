@@ -65,7 +65,12 @@
         "depends": ["Bus"],
         "restart": true
     },
-    "Way Point": {
+    "Arm Control Node": {
+        "command": ["python", "control/arm.py", "config/arm-offsets.yaml"],
+        "depends": ["Master Node", "Left Arm Parameters", "Pump Parameters"],
+        "restart": true
+    },
+    "WayPoint Control Node": {
         "command": ["python", "control/waypoints/waypoints.py"],
         "depends": ["Master Node"],
         "restart": true
