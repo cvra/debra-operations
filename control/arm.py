@@ -184,11 +184,13 @@ def main():
     left_arm_config = yaml.load(open("config/config-left-arm.yaml"))
     right_arm_config = yaml.load(open("config/config-right-arm.yaml"))
 
+    global l, r, arm_lock
     arm_lock = threading.Lock()
     l = Arm(negative_elbow_angle=True)
     r = Arm()
 
     def zero_homing(arg):
+        global l, r, arm_lock
         with arm_lock:
             endstopper = homing_handler.Endstopper()
             endstopper.add(['left-z'], 30, left_arm_config['actuator']['left-z']['control']['torque_limit'])
