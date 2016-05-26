@@ -169,30 +169,22 @@ class ObstacleList:
                 lst.append(copy.copy(o.pos))
             return lst
 
-def odometry_msg_handler(pose, topic, msg):
+def odometry_msg_handler(topic, msg):
+    global pose
+    global pose_lock
     x, y, theta = msg
-    pose.update([x,y], theta)
+    with pose_lock:
+        pose.update([x,y], theta)
 
-def waypoint_msg_handler(target, msg):
-    if msg is not None:
-        x, y, theta = msg
-        pose = RobotPose([x,y], theta)
-    else:
-        pose = None
-    target.update(pose)
-
-class WaypointTarget:
-    def __init__(self):
-        self.pose = None
-        self.lock = Lock()
-
-    def get(self):
-        with self.lock:
-            return copy.copy(self.pose)
-
-    def update(self, pose):
-        with self.lock:
-            self.pose = copy.copy(pose)
+def waypoint_msg_handler(topic, msg):
+    global target
+    global target_lock
+    with target_lock:
+        if msg is not None:
+            x, y, theta = msg
+            target.update([x, y], theta)
+        else:
+            target = None
 
 def main():
     parser = argparse.ArgumentParser()
@@ -202,29 +194,37 @@ def main():
                         pub_addr='ipc://ipc/sink')
     node = zmqmsgbus.Node(bus)
 
-    obstacle_list = ObstacleList()
+    global pose
+    global pose_lock
     pose = RobotPose(xy=[0,0],theta=0)
-    handler = lambda topic, msg: odometry_msg_handler(pose, topic, msg)
-    node.register_message_handler('/position', handler)
+    pose_lock = Lock()
+    node.register_message_handler('/position', odometry_msg_handler)
+
+    global target
+    global target_lock
+    target = None
+    target_lock = Lock()
+    node.register_message_handler('/waypoint', waypoint_msg_handler)
+
+    obstacle_list = ObstacleList()
     handler = lambda topic, msg: obstacle_list.add(msg, time.time())
     node.register_message_handler('/obstacle', handler)
-
-    target_object = WaypointTarget()
-    handler = lambda topic, msg: waypoint_msg_handler(target_object, msg)
-    node.register_message_handler('/waypoint', handler)
 
     time.sleep(1)
 
     waypoint = WayPoint()
 
     while True:
-        target = target_object.get()
+        with pose_lock:
+            pos = copy.copy(pose)
+        with target_lock:
+            tg = copy.copy(target)
 
         obstacles = obstacle_list.get(time.time())
-        if target is None or obstacle_avoidance_robot_should_stop(pose, target, obstacles):
+        if tg is None or obstacle_avoidance_robot_should_stop(pos, tg, obstacles):
             v_left, v_right = 0, 0
         else:
-            v_left, v_right = waypoint.process(pose, target)
+            v_left, v_right = waypoint.process(pos, tg)
 
         node.call('/actuator/velocity', ['left-wheel', -v_left]) # left wheel velocity inversed
         node.call('/actuator/velocity', ['right-wheel', v_right])
