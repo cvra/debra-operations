@@ -215,19 +215,22 @@ def main():
     waypoint = WayPoint()
 
     while True:
-        with pose_lock:
-            pos = copy.copy(pose)
         with target_lock:
             tg = copy.copy(target)
 
-        obstacles = obstacle_list.get(time.time())
-        if tg is None or obstacle_avoidance_robot_should_stop(pos, tg, obstacles):
-            v_left, v_right = 0, 0
-        else:
-            v_left, v_right = waypoint.process(pos, tg)
+        if tg is not None:
+            with pose_lock:
+                pos = copy.copy(pose)
 
-        node.call('/actuator/velocity', ['left-wheel', -v_left]) # left wheel velocity inversed
-        node.call('/actuator/velocity', ['right-wheel', v_right])
+            obstacles = obstacle_list.get(time.time())
+            if obstacle_avoidance_robot_should_stop(pos, tg, obstacles):
+                v_left, v_right = 0, 0
+            else:
+                v_left, v_right = waypoint.process(pos, tg)
+
+            node.call('/actuator/velocity', ['left-wheel', -v_left]) # left wheel velocity inversed
+            node.call('/actuator/velocity', ['right-wheel', v_right])
+
         time.sleep(1/waypoint.frequency)
 
 if __name__ == '__main__':
