@@ -62,6 +62,7 @@
     },
     "Proximity Beacon": {
         "command": ["python", "control/proximity_beacon.py"],
-        "depends": ["Bus"]
+        "depends": ["Bus"],
+        "restart": true
     }
 }
