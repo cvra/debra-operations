@@ -8,7 +8,7 @@ import zmqmsgbus
 import time
 
 MESSAGE_FILTER = ['wheelbase_waypoint']
-SERVICE_FILTER = ['config_update', 'actuator_create_driver']
+SERVICE_FILTER = ['config_update', 'actuator_create_driver', 'led_set']
 
 MASTER_BOARD_STREAM_ADDR = ('0.0.0.0', 20042)
 MASTER_BOARD_SERVICE_ADDR = ('10.0.10.2', 20001)
