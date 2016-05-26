@@ -105,6 +105,7 @@ def lidar_fix_led_thread(node):
             got_lidar_fix_old = got_lidar_fix
         time.sleep(0.05)
 
+
 def main():
     global got_lidar_fix
     bus = zmqmsgbus.Bus(sub_addr='ipc://ipc/source',
@@ -115,6 +116,13 @@ def main():
     o = node.recv('/odometry_raw')
     pose.update_odometry(o)
     pose.reset([0.5, 0.5, np.pi/2])
+    pose_lock = threading.Lock()
+
+    def pose_reset_cb(reset_val):
+        with pose_lock:
+            pose.reset(reset_val)
+
+    node.register_service('/position/reset', pose_reset_cb)
 
     t = threading.Thread(target=lidar_fix_led_thread, args=(node,))
     t.start()
@@ -122,21 +130,23 @@ def main():
     while True:
         try:
             o = node.recv('/odometry_raw', timeout=0)
-            pose.update_odometry(o)
-            node.publish('/position', pose.get_position())
+            with pose_lock:
+                pose.update_odometry(o)
+                node.publish('/position', pose.get_position())
         except queue.Empty:
             pass
         try:
             l = node.recv('/lidar/position', timeout=0)
-            robot_position_lidar = get_robot_position_from_lidar(l)
-            robot_position_kalman = pose.get_position()
-            if (np.linalg.norm(np.array(robot_position_lidar[0:2]) - np.array(robot_position_kalman[0:2])) < 0.2
-                and abs(periodic_error(robot_position_lidar[2] - robot_position_kalman[2])) < 0.1):
-                got_lidar_fix = True
-                pose.update_lidar(robot_position_lidar)
-                node.publish('/position', pose.get_position())
-            else:
-                got_lidar_fix = False
+            with pose_lock:
+                robot_position_lidar = get_robot_position_from_lidar(l)
+                robot_position_kalman = pose.get_position()
+                if (np.linalg.norm(np.array(robot_position_lidar[0:2]) - np.array(robot_position_kalman[0:2])) < 0.2
+                    and abs(periodic_error(robot_position_lidar[2] - robot_position_kalman[2])) < 0.1):
+                    got_lidar_fix = True
+                    pose.update_lidar(robot_position_lidar)
+                    node.publish('/position', pose.get_position())
+                else:
+                    got_lidar_fix = False
         except queue.Empty:
             pass
         time.sleep(0.01)
