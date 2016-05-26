@@ -46,13 +46,16 @@ def get_start_color(node):
         except queue.Empty:
             pass
         if green:
-            node.call("/actuator/led_set", ["green_1", True])
-            node.call("/actuator/led_set", ["green_2", True])
-            return "green"
+            team_color = "green"
+            break
         if yellow:
-            node.call("/actuator/led_set", ["yellow_1", True])
-            node.call("/actuator/led_set", ["yellow_2", True])
-            return "violet"
+            team_color = "violet"
+            break
+
+    node.call("/actuator/led_set", [button_and_led_color[team_color] + '_1', True])
+    while node.recv('/interface-panel/{}-pressed'.format(button_and_led_color[team_color])) is True:
+        pass # wait for release
+    return team_color
 
 
 def wait_for_start(node):
@@ -77,6 +80,13 @@ def init_sequence(node):
 
     logging.debug('resetting to position: {}'.format(start_position[team_color]))
     node.call("/position/reset", start_position[team_color])
+
+    while node.recv('/interface-panel/{}-pressed'.format(button_and_led_color[team_color])) is False:
+        pass
+
+    node.call("/actuator/led_set", [button_and_led_color[team_color] + '_2', True])
+    node.call("/arm/run_zero_homing", None)
+
     return team_color
 
 
