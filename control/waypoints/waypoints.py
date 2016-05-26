@@ -162,7 +162,6 @@ class ObstacleList:
                     self.lst.remove(ob)
 
     def get(self, now):
-        self.remove_old(now)
         lst = list()
         with self.lock:
             for o in self.lst:
@@ -231,6 +230,7 @@ def main():
             node.call('/actuator/velocity', ['left-wheel', -v_left]) # left wheel velocity inversed
             node.call('/actuator/velocity', ['right-wheel', v_right])
 
+        obstacles.remove_old()
         time.sleep(1/waypoint.frequency)
 
 if __name__ == '__main__':
