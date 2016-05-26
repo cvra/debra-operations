@@ -174,8 +174,12 @@ def odometry_msg_handler(pose, topic, msg):
     pose.update([x,y], theta)
 
 def waypoint_msg_handler(target, msg):
-    x, y, theta = msg
-    target.update(RobotPose([x,y], theta))
+    if msg is not None:
+        x, y, theta = msg
+        pose = RobotPose([x,y], theta)
+    else:
+        pose = None
+    target.update(pose)
 
 class WaypointTarget:
     def __init__(self):
