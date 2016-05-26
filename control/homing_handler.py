@@ -40,7 +40,7 @@ class Endstopper:
                         'motor_pos':    30
                     },
                     'control': {
-                        'torque_limit': 0.2*actuator.torque_limit
+                        'torque_limit': 0.1*actuator.torque_limit
                     }
                 }}})
 

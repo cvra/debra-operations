@@ -191,8 +191,8 @@ def main():
     def zero_homing(arg):
         with arm_lock:
             endstopper = homing_handler.Endstopper()
-            endstopper.add(['left-z'], 50, left_arm_config['actuator']['left-z']['control']['torque_limit'])
-            endstopper.add(['right-z'], 50, right_arm_config['actuator']['right-z']['control']['torque_limit'])
+            endstopper.add(['left-z'], 30, left_arm_config['actuator']['left-z']['control']['torque_limit'])
+            endstopper.add(['right-z'], 30, right_arm_config['actuator']['right-z']['control']['torque_limit'])
             endstopper_zeros = endstopper.start()
             l.set_zeros({a[len('left-'):]: z * offsets[a + '-dir'] for a, z in endstopper_zeros.items() if 'left-' in a})
             r.set_zeros({a[len('right-'):]: z * offsets[a + '-dir'] for a, z in endstopper_zeros.items() if 'right-' in a})

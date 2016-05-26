@@ -108,7 +108,7 @@ actuator:
             low_batt_th: 12
             acceleration_limit: 300.
             velocity_limit: 200.
-            torque_limit: 1.3
+            torque_limit: 0.9
 
     left-wrist:
         stream:
