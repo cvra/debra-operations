@@ -125,6 +125,19 @@ class WayPoint:
         v_right = dist_ctrl + head_ctrl
         return [v_left, v_right]
 
+
+def obstacle_avoidance_robot_should_stop(robot_pos, target, obstacles):
+    fwd = target.xy - robot_pos.xy
+    fwd = fwd / np.linalg.norm(fwd)
+    for xy in obstacles:
+        o = np.array(xy)
+        obstacle_vec = o - robot_pos.xy
+        obstacle_dist = np.linalg.norm(robot_pos.xy - o)
+        if np.dot(obstacle_vec, fwd) > 0 and obstacle_dist < OBSTACLE_MIN_DISTANCE:
+            return True
+    return False
+
+
 class ObstaclesList:
     def __init__(self):
         self.lock = Lock()
@@ -175,9 +188,9 @@ def main():
 
     while True:
         v_left, v_right = waypoint.process(pose, target)
-        for xy in obstacles.get():
-            if np.linalg.norm(pose.xy - np.array(xy)) < OBSTACLE_MIN_DISTANCE:
-                v_left, v_right = 0, 0
+
+        if obstacle_avoidance_robot_should_stop(pose, target, obstacles.get()):
+            v_left, v_right = 0, 0
 
         node.call('/actuator/velocity', ['left-wheel', -v_left]) # left wheel velocity inversed
         node.call('/actuator/velocity', ['right-wheel', v_right])

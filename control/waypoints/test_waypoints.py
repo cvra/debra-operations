@@ -72,3 +72,14 @@ class WayPointTest(unittest.TestCase):
         waypoint = wp.WayPoint()
         dist, head = waypoint.error(pose=p, target=t)
         self.assertTrue(dist == 0)
+
+
+class ObstacleAvoidanceTest(unittest.TestCase):
+
+    def test_obstacle_avoidance_robot_shoud_stop(self):
+        p = wp.RobotPose(xy=[0,0],theta=0)
+        t = wp.RobotPose(xy=[1,0],theta=0)
+        self.assertFalse(wp.obstacle_avoidance_robot_should_stop(p, t, []))
+        self.assertFalse(wp.obstacle_avoidance_robot_should_stop(p, t, [[0.5, 0.5]]))
+        self.assertTrue(wp.obstacle_avoidance_robot_should_stop(p, t, [[0.1, 0.1]]))
+        self.assertFalse(wp.obstacle_avoidance_robot_should_stop(p, t, [[-0.1, 0.1]]))
