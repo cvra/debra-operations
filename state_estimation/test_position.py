@@ -27,6 +27,7 @@ class TestPosition(unittest.TestCase):
         z = np.matrix([1])
         P = np.matrix([[1, 2], [2, 4]])
         h_of_x = np.matrix([0.9])
+        z_minus_h_of_x = z - h_of_x
         H = np.matrix([1, 2])
         R = np.matrix([0.1])
 
@@ -35,7 +36,7 @@ class TestPosition(unittest.TestCase):
         P_kp1 = (np.eye(len(x)) - K * H) * P
         x_kp1 = x + K * (z - h_of_x)
 
-        x_test, P_test = position.kalman_measurement_update(x, P, z, h_of_x, H, R)
+        x_test, P_test = position.kalman_measurement_update(x, P, z_minus_h_of_x, H, R)
         np.testing.assert_almost_equal(x_kp1, x_test)
         np.testing.assert_almost_equal(P_kp1, P_test)
 

@@ -38,19 +38,18 @@ def kalman_state_propagation(P, Phi, Q):
     """
     return Phi * P * Phi.T + Q
 
-def kalman_measurement_update(x, P, z, h_of_x, H, R):
+def kalman_measurement_update(x, P, z_minus_h_of_x, H, R):
     """
         x: state
         P: state covariance
-        z: measurement
-        h_of_x: measurement prediction
+        z_minus_h_of_x: measurement - measurement prediction
         H: measurement prediction jacobian
         R: measurement noise
     """
     S = H * P * H.T + R
     K = P * H.T * np.linalg.inv(S)
     P = (np.eye(len(x)) - K * H) * P
-    x = x + K * (z - h_of_x)
+    x = x + K * z_minus_h_of_x
     return x, P
 
 
@@ -81,11 +80,13 @@ class PositionEstimator():
         # measurement update
         z = np.matrix(robot_position).T
         h_of_x = np.matrix(map_odometry_to_table(self.position_odometry, self.x.T.tolist()[0])).T
+        z_minus_h_of_x = z - h_of_x
+        z_minus_h_of_x[2] = periodic_error(z_minus_h_of_x[2])
         H = np.matrix([[1, 0, -sin(self.x[2])*self.position_odometry[0]-cos(self.x[2])*self.position_odometry[1]],
                        [0, 1, cos(self.x[2])*self.position_odometry[0]-sin(self.x[2])*self.position_odometry[1]],
                        [0, 0, 1]])
         R = np.matrix(np.diag([0.03, 0.03, 0.05]))
-        self.x, self.P = kalman_measurement_update(self.x, self.P, z, h_of_x, H, R)
+        self.x, self.P = kalman_measurement_update(self.x, self.P, z_minus_h_of_x, H, R)
 
     def get_position(self):
         return map_odometry_to_table(self.position_odometry, self.x.T.tolist()[0])
