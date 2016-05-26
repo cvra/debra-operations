@@ -89,7 +89,8 @@ class PositionEstimator():
         self.x, self.P = kalman_measurement_update(self.x, self.P, z_minus_h_of_x, H, R)
 
     def get_position(self):
-        return map_odometry_to_table(self.position_odometry, self.x.T.tolist()[0])
+        pos = map_odometry_to_table(self.position_odometry, self.x.T.tolist()[0])
+        return [pos[0], pos[1], periodic_error(pos[2])]
 
 got_lidar_fix = False
 
