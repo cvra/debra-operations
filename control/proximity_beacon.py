@@ -26,7 +26,10 @@ def relative_to_global_position(x, y, theta, dist, angle):
 
 def proximity_beacon_msg(node, position, msg):
     start, length = msg
-    angle, dist = relative_heading_and_distance(start, length)
+    angle_dist = relative_heading_and_distance(start, length)
+    if angle_dist is None:
+        return
+    angle, dist = angle_dist
     x, y, theta = position.get()
     pos = relative_to_global_position(x, y, theta, dist, angle)
     node.publish('/obstacle', pos)
