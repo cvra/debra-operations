@@ -64,5 +64,10 @@
         "command": ["python", "control/proximity_beacon.py"],
         "depends": ["Bus"],
         "restart": true
+    },
+    "Way Point": {
+        "command": ["python", "control/waypoints/waypoints.py"],
+        "depends": ["Master Node"],
+        "restart": true
     }
 }
