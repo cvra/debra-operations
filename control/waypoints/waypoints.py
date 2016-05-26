@@ -181,7 +181,10 @@ def waypoint_msg_handler(topic, msg):
     with target_lock:
         if msg is not None:
             x, y, theta = msg
-            target.update([x, y], theta)
+            if target is None:
+                target = RobotPose([x, y], theta)
+            else:
+                target.update([x, y], theta)
         else:
             target = None
 
@@ -230,7 +233,7 @@ def main():
             node.call('/actuator/velocity', ['left-wheel', -v_left]) # left wheel velocity inversed
             node.call('/actuator/velocity', ['right-wheel', v_right])
 
-        obstacles.remove_old()
+        obstacle_list.remove_old(time.time())
         time.sleep(1/waypoint.frequency)
 
 if __name__ == '__main__':
