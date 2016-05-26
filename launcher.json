@@ -59,5 +59,9 @@
         "depends": ["Master Node", "Left Arm Parameters"],
         "dependency forces restart": true,
         "delay": 1
+    },
+    "Proximity Beacon": {
+        "command": ["python", "control/proximity_beacon.py"],
+        "depends": ["Bus"],
     }
 }
