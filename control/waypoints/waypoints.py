@@ -173,11 +173,25 @@ def odometry_msg_handler(pose, topic, msg):
     x, y, theta = msg
     pose.update([x,y], theta)
 
+def waypoint_msg_handler(target, msg):
+    x, y, theta = msg
+    target.update(RobotPose([x,y], theta))
+
+class WaypointTarget:
+    def __init__(self):
+        self.pose = None
+        self.lock = Lock()
+
+    def get(self):
+        with self.lock:
+            return copy.copy(self.pose)
+
+    def update(self, pose):
+        with self.lock:
+            self.pose = copy.copy(pose)
+
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('target_x', type=float)
-    parser.add_argument('target_y', type=float)
-    parser.add_argument('--theta')
     args = parser.parse_args()
 
     bus = zmqmsgbus.Bus(sub_addr='ipc://ipc/source',
@@ -191,25 +205,24 @@ def main():
     handler = lambda topic, msg: obstacle_list.add(msg, time.time())
     node.register_message_handler('/obstacle', handler)
 
+    target_object = WaypointTarget()
+    handler = lambda topic, msg: waypoint_msg_handler(target_object, msg)
+    node.register_message_handler('/waypoint', handler)
+
     time.sleep(1)
 
-    target_x = args.target_x
-    target_y = args.target_y
-
-    # if 'theta' in args:
-    if args.theta is not None:
-        target_theta = float(args.theta)
-    else:
-        target_theta = None
-
     waypoint = WayPoint()
-    target = RobotPose(xy=[target_x, target_y], theta=target_theta)
 
     while True:
-        v_left, v_right = waypoint.process(pose, target)
+        target = target_object.get()
+        if target is not None:
+            v_left, v_right = waypoint.process(pose, target)
 
-        obstacles = obstacle_list.get(time.time())
-        if obstacle_avoidance_robot_should_stop(pose, target, obstacles):
+            obstacles = obstacle_list.get(time.time())
+            if obstacle_avoidance_robot_should_stop(pose, target, obstacles):
+                v_left, v_right = 0, 0
+
+        else:
             v_left, v_right = 0, 0
 
         node.call('/actuator/velocity', ['left-wheel', -v_left]) # left wheel velocity inversed
