@@ -19,13 +19,13 @@ def zero_torque(node):
     node.call("/actuator/torque", ["left-wheel", 0])
     node.call("/actuator/torque", ["right-wheel", 0])
     node.call("/actuator/torque", ["left-z", 0])
-    node.call("/actuator/torque", ["left-shoulder", 0])
     node.call("/actuator/torque", ["left-elbow", 0])
     node.call("/actuator/torque", ["left-wrist", 0])
     node.call("/actuator/torque", ["right-z", 0])
-    node.call("/actuator/torque", ["right-shoulder", 0])
     node.call("/actuator/torque", ["right-elbow", 0])
     node.call("/actuator/torque", ["right-wrist", 0])
+    node.call("/actuator/torque", ["left-shoulder", 0])
+    node.call("/actuator/torque", ["right-shoulder", 0])
 
 
 def get_start_color(node):
@@ -84,6 +84,8 @@ def init_sequence(node):
     while node.recv('/interface-panel/{}-pressed'.format(button_and_led_color[team_color])) is False:
         pass
 
+    node.call("/actuator/velocity", ["left-shoulder", 0])
+    node.call("/actuator/velocity", ["right-shoulder", 0])
     node.call("/actuator/led_set", [button_and_led_color[team_color] + '_2', True])
     node.call("/arm/run_zero_homing", None)
 
@@ -105,8 +107,30 @@ def main():
     while team_color is None:
         team_color = init_sequence(node)
 
+    node.publish('/waypoint', [0.95, 0.17, 1.57079])
+
     wait_for_start(node)
     logging.info("start!")
+
+    node.publish('/waypoint', [1.2, 0.65, pi/2])
+    time.sleep(5)
+    node.publish('/left-arm/table-setpoint', [0, 0.9, 0.65, 0.1, 0])
+    time.sleep(2)
+    node.call("/actuator/voltage", ['left-pump-1', -12])
+    node.call("/actuator/voltage", ['left-pump-2', 12])
+    node.call("/actuator/voltage", ['left-pump-3', 12])
+    node.call("/actuator/voltage", ['left-pump-4', -12])
+    time.sleep(2)
+    node.publish('/left-arm/table-setpoint', [0, 0.9, 0.65, 0.062, 0])
+    time.sleep(2)
+    node.publish('/left-arm/table-setpoint', [0, 0.9, 0.65, 0.15, 0])
+    time.sleep(2)
+
+    node.call("/actuator/voltage", ['left-pump-1', 0])
+    node.call("/actuator/voltage", ['left-pump-2', 0])
+    node.call("/actuator/voltage", ['left-pump-3', 0])
+    node.call("/actuator/voltage", ['left-pump-4', 0])
+
 
 
 if __name__ == '__main__':

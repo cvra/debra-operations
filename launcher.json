@@ -74,5 +74,10 @@
         "command": ["python", "control/waypoints/waypoints.py"],
         "depends": ["Master Node"],
         "restart": true
+    },
+    "Main Script": {
+        "command": ["python", "main.py"],
+        "depends": ["Master Node", "Arm Control Node", "WayPoint Control Node"],
+        "delay": 4
     }
 }
