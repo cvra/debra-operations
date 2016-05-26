@@ -90,7 +90,7 @@ def main():
     node.register_service('/actuator/trajectory', update_trajectory)
 
     while 1:
-        time.sleep(0.1)
+        time.sleep(0.02)
         pub.publish(time.time())
 
 if __name__ == "__main__":
