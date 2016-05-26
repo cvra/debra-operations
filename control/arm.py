@@ -194,12 +194,7 @@ def main():
     l.set_zeros({a[len('left-'):]: z * offsets[a + '-dir'] for a, z in endstopper_zeros.items() if 'left-' in a})
     r.set_zeros({a[len('right-'):]: z * offsets[a + '-dir'] for a, z in endstopper_zeros.items() if 'right-' in a})
 
-    # indexer = homing_handler.Indexer()
-    # indexer.add(['left-shoulder', 'left-elbow', 'left-wrist'])
-    # indexer.add(['right-shoulder', 'right-elbow', 'right-wrist'])
-    # indexer_zeros = indexer.start()
-    # l.set_zeros({a[len('left-'):]: z * offsets[a + '-dir'] for a, z in indexer_zeros.items() if 'left-' in a})
-    # r.set_zeros({a[len('right-'):]: z * offsets[a + '-dir'] for a, z in indexer_zeros.items() if 'right-' in a})
+
     l.set_zeros({'shoulder': cst_vel_homing.homing('left-shoulder', 1)
                                   * offsets['left-shoulder-dir']})
     l.set_zeros({'elbow': cst_vel_homing.homing('left-elbow', 1)
