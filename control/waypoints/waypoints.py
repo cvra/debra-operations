@@ -219,15 +219,12 @@ def main():
 
     while True:
         target = target_object.get()
-        if target is not None:
-            v_left, v_right = waypoint.process(pose, target)
 
-            obstacles = obstacle_list.get(time.time())
-            if obstacle_avoidance_robot_should_stop(pose, target, obstacles):
-                v_left, v_right = 0, 0
-
-        else:
+        obstacles = obstacle_list.get(time.time())
+        if target is None or obstacle_avoidance_robot_should_stop(pose, target, obstacles):
             v_left, v_right = 0, 0
+        else:
+            v_left, v_right = waypoint.process(pose, target)
 
         node.call('/actuator/velocity', ['left-wheel', -v_left]) # left wheel velocity inversed
         node.call('/actuator/velocity', ['right-wheel', v_right])
