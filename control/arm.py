@@ -49,6 +49,7 @@ class Arm:
                                    ('shoulder', 0),
                                    ('elbow', 0),
                                    ('wrist', 0)])
+        self.negative_elbow_angle = negative_elbow_angle
 
     def set_zeros(self, zeros):
         for actuator in zeros:
@@ -71,7 +72,8 @@ class Arm:
                                                                self.upper_arm,
                                                                self.forearm,
                                                                self.z_meter_per_rad,
-                                                               limits)
+                                                               limits,
+                                                               self.negative_elbow_angle)
         self.joints['shoulder'] = shoulder
         self.joints['elbow'] = elbow
         self.joints['z'] = z_actuator
