@@ -240,7 +240,7 @@ def main():
         except queue.Empty:
             pass
         except ValueError as e:
-            logging.debug('left arm ' + e)
+            logging.debug('left arm ' + str(e))
         try:
             setpoint = node.recv('/right-arm/setpoint', timeout=0)
             with arm_lock:
@@ -253,7 +253,7 @@ def main():
         except queue.Empty:
             pass
         except ValueError as e:
-            logging.debug('right arm ' + e)
+            logging.debug('right arm ' + str(e))
         time.sleep(0.01)
 
 
