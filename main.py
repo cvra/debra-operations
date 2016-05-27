@@ -41,6 +41,12 @@ def zero_velocity(node):
     node.call("/actuator/velocity", ["right-shoulder", 0])
 
 
+def safe_arm_position(node):
+    node.publish('/left-arm/setpoint', [0, 0.14, 0.1, 0.185, 0])
+    node.publish('/right-arm/setpoint', [0, 0.14, -0.1, 0.185, 0])
+    time.sleep(1)
+
+
 def get_start_color(node):
     green = False
     yellow = False
@@ -100,6 +106,7 @@ def init_sequence(node):
     zero_velocity(node)
     node.call("/actuator/led_set", [button_and_led_color[team_color] + '_2', True])
     node.call("/arm/run_zero_homing", None)
+    safe_arm_position(node)
 
     return team_color
 
