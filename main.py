@@ -73,6 +73,17 @@ def set_waypoint(node, team_color, pos):
     node.publish('/waypoint', pos)
 
 
+def set_pump(node, team_color, arm, pump, voltage):
+    left_pump_dir = {1: -1, 2: 1, 3: 1, 4: -1, 5: -1}
+    right_pump_dir = {1: 1, 2: -1, 3: 1, 4: 1, 5: 1}
+    pump_dir = {'left': left_pump_dir, 'right': right_pump_dir}
+
+    if team_color is 'green':
+        arm = flip_left_right[arm]
+        pump = flip_hand_tool[pump]
+    node.call('/actuator/voltage', ['{}-pump-{}'.format(arm, pump), pump_dir[arm][pump] * voltage])
+
+
 def safe_arm_position(node):
     node.publish('/left-arm/setpoint', [5, 0.14, 0.0, 0.185, -pi/2])
     node.publish('/right-arm/setpoint', [5, 0.14, 0.0, 0.185, pi/2])
@@ -184,7 +195,7 @@ def main():
     move_arm_in_table_frame(node, team_color, 'right', [5, 0.9, 0.635, 0.118, pi/2])
     time.sleep(2)
 
-    node.call("/actuator/voltage", ['right-pump-5', 15])
+    set_pump(node, team_color, 'right', 5, 15)
     time.sleep(2)
     # grab
     move_arm_in_table_frame(node, team_color, 'right', [5, 0.9, 0.68, 0.118, pi/2])
@@ -195,20 +206,19 @@ def main():
     time.sleep(2)
 
     # hand over
-    # TODO activate other pump
+    set_pump(node, team_color, 'left', 5, 15)
     move_arm_in_body_frame(node, team_color, 'left', [5, 0.14, -0.01, 0.185, -1.6])
     move_arm_in_body_frame(node, team_color, 'right', [5, 0.14, 0.01, 0.185, 1.6])
     time.sleep(2)
 
-    node.call("/actuator/voltage", ['right-pump-5', 0])
-
+    set_pump(node, team_color, 'right', 5, 0)
 
     move_arm_in_table_frame(node, team_color, 'right', [0, 0.9, 0.65, 0.1, pi])
     time.sleep(2)
-    node.call("/actuator/voltage", ['right-pump-1', -12])
-    node.call("/actuator/voltage", ['right-pump-2', 12])
-    node.call("/actuator/voltage", ['right-pump-3', 12])
-    node.call("/actuator/voltage", ['right-pump-4', -12])
+    set_pump(node, team_color, 'right', 1, 12)
+    set_pump(node, team_color, 'right', 2, 12)
+    set_pump(node, team_color, 'right', 3, 12)
+    set_pump(node, team_color, 'right', 4, 12)
     time.sleep(2)
     move_arm_in_table_frame(node, team_color, 'right', [0, 0.9, 0.65, 0.062, pi])
     time.sleep(2)
@@ -222,10 +232,12 @@ def main():
     # place blocks in center
     move_arm_in_table_frame(node, team_color, 'right', [0, 0.88, 1.2, 0.07, pi])
     time.sleep(2)
-    node.call("/actuator/voltage", ['right-pump-1', 0])
-    node.call("/actuator/voltage", ['right-pump-2', 0])
-    node.call("/actuator/voltage", ['right-pump-3', 0])
-    node.call("/actuator/voltage", ['right-pump-4', 0])
+    set_pump(node, team_color, 'right', 1, 0)
+    set_pump(node, team_color, 'right', 2, 0)
+    set_pump(node, team_color, 'right', 3, 0)
+    set_pump(node, team_color, 'right', 4, 0)
+
+    set_pump(node, team_color, 'left', 5, 0)
     time.sleep(2)
 
     move_arm_in_table_frame(node, team_color, 'right', [0, 0.88, 1.2, 0.15, pi])

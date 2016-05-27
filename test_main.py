@@ -26,3 +26,8 @@ class TestMapping(unittest.TestCase):
         pos = [1, 2, pi/3]
         main.set_waypoint(node, 'green', pos)
         node.publish.assert_called_once_with('/waypoint', [1, main.table_length - 2, -pi/3])
+
+    def test_set_pump(self):
+        node = Mock()
+        main.set_pump(node, 'green', 'left', 1, 12)
+        node.call.assert_called_once_with('/actuator/voltage', ['right-pump-2', 12])
