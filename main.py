@@ -14,6 +14,15 @@ start_position = {'violet': [0.85, 0.129, -pi/2],
 enemy_color = {'violet': 'green', 'green': 'violet'}
 button_and_led_color = {'violet': 'yellow', 'green': 'green'}
 
+flip_left_right = {'left': 'right', 'right': 'left'}
+flip_hand_tool = {0: 0, 1: 2, 2: 1, 3: 4, 4: 3, 5: 5}
+
+
+def flip_table_xytheta(xytheta):
+    xytheta[1] = table_length - xytheta[1] # flip y
+    xytheta[2] = - xytheta[2] # flip theta
+    return xytheta
+
 
 def zero_torque(node):
     node.call("/actuator/torque", ["left-wheel", 0])
@@ -39,6 +48,29 @@ def zero_velocity(node):
     node.call("/actuator/velocity", ["right-wrist", 0])
     node.call("/actuator/velocity", ["left-shoulder", 0])
     node.call("/actuator/velocity", ["right-shoulder", 0])
+
+
+def move_arm_in_table_frame(node, team_color, arm, pos):
+    if team_color is 'green':
+        arm = flip_left_right[arm]
+        pos[1], pos[2], pos[4] = flip_table_xytheta([pos[1], pos[2], pos[4]])
+        pos[0] = flip_hand_tool[pos[0]]
+    node.publish('/{}-arm/table-setpoint'.format(arm), pos)
+
+
+def move_arm_in_body_frame(node, team_color, arm, pos):
+    if team_color is 'green':
+        arm = flip_left_right[arm]
+        pos[2] = - pos[2] # flip y
+        pos[4] = - pos[4] # flip theta
+        pos[0] = flip_hand_tool[pos[0]]
+    node.publish('/{}-arm/setpoint'.format(arm), pos)
+
+
+def set_waypoint(node, team_color, pos):
+    if team_color is 'green':
+        pos = flip_table_xytheta(pos)
+    node.publish('/waypoint', pos)
 
 
 def safe_arm_position(node):
@@ -128,12 +160,12 @@ def main():
     while team_color is None:
         team_color = init_sequence(node)
 
-    node.publish('/waypoint', [0.95, 0.17, 1.57079])
+    set_waypoint(node, team_color, [0.95, 0.17, pi/2])
 
     wait_for_start(node)
     logging.info("start!")
 
-    node.publish('/waypoint', [0.6, 0.65, pi/2])
+    set_waypoint(node, team_color, [0.6, 0.65, pi/2])
     time.sleep(5)
 
     # right-pump-5, 12
@@ -143,52 +175,52 @@ def main():
     # right-pump-4, -12
 
     # above cylinder
-    node.publish('/right-arm/table-setpoint', [5, 0.8, 0.9, 0.24, pi/2])
+    move_arm_in_table_frame(node, team_color, 'right', [5, 0.8, 0.9, 0.24, pi/2])
     time.sleep(1)
-    node.publish('/right-arm/table-setpoint', [5, 0.9, 0.6, 0.24, pi/2])
+    move_arm_in_table_frame(node, team_color, 'right', [5, 0.9, 0.6, 0.24, pi/2])
     time.sleep(2)
 
     # descend
-    node.publish('/right-arm/table-setpoint', [5, 0.9, 0.635, 0.118, pi/2])
+    move_arm_in_table_frame(node, team_color, 'right', [5, 0.9, 0.635, 0.118, pi/2])
     time.sleep(2)
 
     node.call("/actuator/voltage", ['right-pump-5', 15])
     time.sleep(2)
     # grab
-    node.publish('/right-arm/table-setpoint', [5, 0.9, 0.68, 0.118, pi/2])
+    move_arm_in_table_frame(node, team_color, 'right', [5, 0.9, 0.68, 0.118, pi/2])
     time.sleep(2)
 
     # ascend
-    node.publish('/right-arm/table-setpoint', [5, 0.9, 0.68, 0.18, pi/2])
+    move_arm_in_table_frame(node, team_color, 'right', [5, 0.9, 0.68, 0.18, pi/2])
     time.sleep(2)
 
     # hand over
     # TODO activate other pump
-    node.publish('/left-arm/setpoint', [5, 0.14, -0.01, 0.185, -1.6])
-    node.publish('/right-arm/setpoint', [5, 0.14, 0.01, 0.185, 1.6])
+    move_arm_in_body_frame(node, team_color, 'left', [5, 0.14, -0.01, 0.185, -1.6])
+    move_arm_in_body_frame(node, team_color, 'right', [5, 0.14, 0.01, 0.185, 1.6])
     time.sleep(2)
 
     node.call("/actuator/voltage", ['right-pump-5', 0])
 
 
-    node.publish('/right-arm/table-setpoint', [0, 0.9, 0.65, 0.1, pi])
+    move_arm_in_table_frame(node, team_color, 'right', [0, 0.9, 0.65, 0.1, pi])
     time.sleep(2)
     node.call("/actuator/voltage", ['right-pump-1', -12])
     node.call("/actuator/voltage", ['right-pump-2', 12])
     node.call("/actuator/voltage", ['right-pump-3', 12])
     node.call("/actuator/voltage", ['right-pump-4', -12])
     time.sleep(2)
-    node.publish('/right-arm/table-setpoint', [0, 0.9, 0.65, 0.062, pi])
+    move_arm_in_table_frame(node, team_color, 'right', [0, 0.9, 0.65, 0.062, pi])
     time.sleep(2)
-    node.publish('/right-arm/table-setpoint', [0, 0.9, 0.65, 0.15, pi])
+    move_arm_in_table_frame(node, team_color, 'right', [0, 0.9, 0.65, 0.15, pi])
     time.sleep(2)
 
-    node.publish('/waypoint', [0.57, 1.2, pi/2])
+    set_waypoint(node, team_color, [0.57, 1.2, pi/2])
     time.sleep(5)
-    node.publish('/right-arm/table-setpoint', [0, 0.88, 1.2, 0.15, pi])
+    move_arm_in_table_frame(node, team_color, 'right', [0, 0.88, 1.2, 0.15, pi])
     time.sleep(2)
     # place blocks in center
-    node.publish('/right-arm/table-setpoint', [0, 0.88, 1.2, 0.07, pi])
+    move_arm_in_table_frame(node, team_color, 'right', [0, 0.88, 1.2, 0.07, pi])
     time.sleep(2)
     node.call("/actuator/voltage", ['right-pump-1', 0])
     node.call("/actuator/voltage", ['right-pump-2', 0])
@@ -196,8 +228,10 @@ def main():
     node.call("/actuator/voltage", ['right-pump-4', 0])
     time.sleep(2)
 
-    node.publish('/right-arm/table-setpoint', [0, 0.88, 1.2, 0.15, pi])
+    move_arm_in_table_frame(node, team_color, 'right', [0, 0.88, 1.2, 0.15, pi])
 
+    time.sleep(2)
+    safe_arm_position(node)
 
 if __name__ == '__main__':
     main()
