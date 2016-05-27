@@ -180,6 +180,8 @@ def waypoint_msg_handler(topic, msg):
     global target_lock
     with target_lock:
         if msg is not None:
+            if len(msg) != 3:
+                return
             x, y, theta = msg
             if target is None:
                 target = RobotPose([x, y], theta)
