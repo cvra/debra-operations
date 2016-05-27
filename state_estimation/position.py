@@ -98,7 +98,7 @@ def lidar_fix_led_thread(node):
         if got_lidar_fix_old != got_lidar_fix:
             node.call('/actuator/led_set', ['debug', not got_lidar_fix])
             got_lidar_fix_old = got_lidar_fix
-        time.sleep(0.05)
+        time.sleep(0.1)
 
 
 def main():
