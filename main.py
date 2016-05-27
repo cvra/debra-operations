@@ -230,9 +230,10 @@ def main():
     # hand over
     set_pump(node, team_color, 'left', 5, 15)
     move_arm_in_body_frame(node, team_color, 'left', [5, 0.14, -0.01, 0.185, -1.6])
-    move_arm_in_body_frame(node, team_color, 'right', [5, 0.14, 0.01, 0.185, 1.6])
+    move_arm_in_body_frame(node, team_color, 'right', [5, 0.14, 0.01, 0.205, 1.6])
     time.sleep(2)
-
+    set_pump(node, team_color, 'right', 5, -12) # push a little
+    time.sleep(2)
     set_pump(node, team_color, 'right', 5, 0)
 
     move_arm_in_table_frame(node, team_color, 'right', [0, 0.9, 0.65, 0.1, pi])
@@ -242,7 +243,7 @@ def main():
     set_pump(node, team_color, 'right', 3, 12)
     set_pump(node, team_color, 'right', 4, 12)
     time.sleep(2)
-    move_arm_in_table_frame(node, team_color, 'right', [0, 0.9, 0.65, 0.062, pi])
+    move_arm_in_table_frame(node, team_color, 'right', [0, 0.9, 0.65, 0.06, pi])
     time.sleep(2)
     move_arm_in_table_frame(node, team_color, 'right', [0, 0.9, 0.65, 0.15, pi])
     time.sleep(2)
