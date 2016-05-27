@@ -74,8 +74,8 @@ def set_waypoint(node, team_color, pos):
 
 
 def set_pump(node, team_color, arm, pump, voltage):
-    left_pump_dir = {1: -1, 2: 1, 3: 1, 4: -1, 5: -1}
-    right_pump_dir = {1: 1, 2: -1, 3: 1, 4: 1, 5: 1}
+    left_pump_dir = {1: -1, 2: 1, 3: -1, 4: 1, 5: -1}
+    right_pump_dir = {1: -1, 2: 1, 3: 1, 4: -1, 5: 1}
     pump_dir = {'left': left_pump_dir, 'right': right_pump_dir}
 
     if team_color is 'green':
