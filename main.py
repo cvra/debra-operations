@@ -131,24 +131,49 @@ def main():
     wait_for_start(node)
     logging.info("start!")
 
-    node.publish('/waypoint', [1.2, 0.65, pi/2])
+    node.publish('/waypoint', [0.6, 0.65, pi/2])
     time.sleep(5)
-    node.publish('/left-arm/table-setpoint', [0, 0.9, 0.65, 0.1, 0])
-    time.sleep(2)
-    node.call("/actuator/voltage", ['left-pump-1', -12])
-    node.call("/actuator/voltage", ['left-pump-2', 12])
-    node.call("/actuator/voltage", ['left-pump-3', 12])
-    node.call("/actuator/voltage", ['left-pump-4', -12])
-    time.sleep(2)
-    node.publish('/left-arm/table-setpoint', [0, 0.9, 0.65, 0.062, 0])
-    time.sleep(2)
-    node.publish('/left-arm/table-setpoint', [0, 0.9, 0.65, 0.15, 0])
+
+    # right-pump-5, -12
+    # right-pump-1, 12
+    # right-pump-2, 12
+    # right-pump-3, 12
+    # right-pump-4, -12
+
+    # above cylinder
+    node.publish('/right-arm/table-setpoint', [5, 0.9, 0.6, 0.18, pi/2])
     time.sleep(2)
 
-    node.call("/actuator/voltage", ['left-pump-1', 0])
-    node.call("/actuator/voltage", ['left-pump-2', 0])
-    node.call("/actuator/voltage", ['left-pump-3', 0])
-    node.call("/actuator/voltage", ['left-pump-4', 0])
+    # descend
+    node.publish('/right-arm/table-setpoint', [5, 0.9, 0.6, 0.118, pi/2])
+    time.sleep(2)
+
+    node.call("/actuator/voltage", ['right-pump-5', -12])
+    time.sleep(2)
+    # grab
+    node.publish('/right-arm/table-setpoint', [5, 0.9, 0.65, 0.118, pi/2])
+    time.sleep(2)
+
+    # ascend
+    node.publish('/right-arm/table-setpoint', [5, 0.9, 0.65, 0.18, pi/2])
+    time.sleep(2)
+
+    node.publish('/right-arm/table-setpoint', [0, 0.9, 0.65, 0.1, 0])
+    time.sleep(2)
+    node.call("/actuator/voltage", ['right-pump-1', -12])
+    node.call("/actuator/voltage", ['right-pump-2', 12])
+    node.call("/actuator/voltage", ['right-pump-3', 12])
+    node.call("/actuator/voltage", ['right-pump-4', -12])
+    time.sleep(2)
+    node.publish('/right-arm/table-setpoint', [0, 0.9, 0.65, 0.062, 0])
+    time.sleep(2)
+    node.publish('/right-arm/table-setpoint', [0, 0.9, 0.65, 0.15, 0])
+    time.sleep(2)
+
+    node.call("/actuator/voltage", ['right-pump-1', 0])
+    node.call("/actuator/voltage", ['right-pump-2', 0])
+    node.call("/actuator/voltage", ['right-pump-3', 0])
+    node.call("/actuator/voltage", ['right-pump-4', 0])
 
 
 
