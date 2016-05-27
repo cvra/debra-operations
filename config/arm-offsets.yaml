@@ -1,10 +1,10 @@
-left-shoulder:      0
-left-elbow:         0
+left-shoulder:      -0.037
+left-elbow:         0.035
 left-wrist:         2.36
 left-z:             -263.89
 
-right-shoulder:     0
-right-elbow:        0
+right-shoulder:     0.0685
+right-elbow:        -0.055
 right-wrist:        2.36
 right-z:            -263.89
 
