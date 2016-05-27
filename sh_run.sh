@@ -1,4 +1,7 @@
 #!/bin/bash
+
+set -e
+
 source ./env/bin/activate
 mkdir -p ipc
 mkdir -p logs
