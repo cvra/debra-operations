@@ -40,11 +40,6 @@ class TestPosition(unittest.TestCase):
         np.testing.assert_almost_equal(x_kp1, x_test)
         np.testing.assert_almost_equal(P_kp1, P_test)
 
-    def test_get_robot_position_form_lidar(self):
-        lidar = [1, 1, pi/2]
-        robot_position = position.get_robot_position_from_lidar(lidar)
-        self.assertAlmostEqual([1, 1-0.074, pi/2], robot_position)
-
     def test_compute_odometry_offset(self):
         table_pos = [1, 2, 3]
         odometry_pos = [4, 5, 6]

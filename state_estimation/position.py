@@ -53,13 +53,6 @@ def kalman_measurement_update(x, P, z_minus_h_of_x, H, R):
     return x, P
 
 
-def get_robot_position_from_lidar(lidar):
-    lidar_heading = lidar[2]
-    robot_position = np.array(lidar[0:2]) - np.array([cos(lidar_heading), sin(lidar_heading)]) * 0.074
-    return [robot_position[0], robot_position[1], lidar_heading]
-
-
-
 class PositionEstimator():
 
     def __init__(self):
@@ -140,7 +133,7 @@ def main():
         try:
             l = node.recv('/lidar/position', timeout=0)
             with pose_lock:
-                robot_position_lidar = get_robot_position_from_lidar(l)
+                robot_position_lidar = l
                 robot_position_kalman = pose.get_position()
                 if (np.linalg.norm(np.array(robot_position_lidar[0:2]) - np.array(robot_position_kalman[0:2])) < 0.2
                     and abs(periodic_error(robot_position_lidar[2] - robot_position_kalman[2])) < 0.1):
