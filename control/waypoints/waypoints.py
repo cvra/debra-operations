@@ -92,7 +92,7 @@ class PID:
 class WayPoint:
     def __init__(self):
         self.frequency = 50 # [Hz]
-        self.min_distance_error = 0.05 # [m]
+        self.target_position_tolerance = 0.03 # [m]
         self.waypoints_distance_limit = 0.4 # [m]
         self.rotation_speed = 0.5 # [rad/s]
         self.heading_pid = PID(kp=15,ki=0.,kd=1,ilimit=0,freq=self.frequency)
@@ -105,7 +105,7 @@ class WayPoint:
         distance_error = -pose.forward_distance_to(target)
         distance_error = limit(distance_error, -self.waypoints_distance_limit, self.waypoints_distance_limit)
 
-        if pose.distance_to(target) > self.min_distance_error:
+        if pose.distance_to(target) > self.target_position_tolerance:
             if self.heading_error_large.evaluate(abs(heading_error)):
                 distance_error = 0
         else:
