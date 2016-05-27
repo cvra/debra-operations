@@ -78,7 +78,7 @@ class Arm:
         self.joints['elbow'] = elbow
         self.joints['z'] = z_actuator
         self.joints['wrist'] = theta - shoulder - elbow
-        logging.debug('move arm: pos = {}, zeros = {}'.format(self.joints, self.zeros))
+        # logging.debug('move arm: pos = {}, zeros = {}'.format(self.joints, self.zeros))
 
     def move_tcp(self, tool, x, y, z, theta):
         tcp_offset = self.get_tcp_offset(tool, theta)
