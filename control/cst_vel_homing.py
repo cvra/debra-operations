@@ -55,8 +55,12 @@ def homing(actuator, velocity, periodic=False):
     while True:
         node.call('/actuator/velocity', [actuator, velocity])
         time.sleep(n)
+        if state['idx_p'] is not None and state['idx_n'] is not None:
+            break
         node.call('/actuator/velocity', [actuator, -velocity])
         time.sleep(2*n)
+        if state['idx_p'] is not None and state['idx_n'] is not None:
+            break
         node.call('/actuator/velocity', [actuator, velocity])
         time.sleep(n)
         if state['idx_p'] is not None and state['idx_n'] is not None:
