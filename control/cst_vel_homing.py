@@ -65,7 +65,7 @@ def homing(actuator, velocity, periodic=False):
         time.sleep(n)
         if state['idx_p'] is not None and state['idx_n'] is not None:
             break
-        n *= 1.5
+        n *= 2
 
     if periodic:
         center = center_between_periodic_angles(state['idx_p'], state['idx_n'])
