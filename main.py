@@ -28,6 +28,19 @@ def zero_torque(node):
     node.call("/actuator/torque", ["right-shoulder", 0])
 
 
+def zero_velocity(node):
+    node.call("/actuator/velocity", ["left-wheel", 0])
+    node.call("/actuator/velocity", ["right-wheel", 0])
+    node.call("/actuator/velocity", ["left-z", 0])
+    node.call("/actuator/velocity", ["left-elbow", 0])
+    node.call("/actuator/velocity", ["left-wrist", 0])
+    node.call("/actuator/velocity", ["right-z", 0])
+    node.call("/actuator/velocity", ["right-elbow", 0])
+    node.call("/actuator/velocity", ["right-wrist", 0])
+    node.call("/actuator/velocity", ["left-shoulder", 0])
+    node.call("/actuator/velocity", ["right-shoulder", 0])
+
+
 def get_start_color(node):
     green = False
     yellow = False
@@ -84,8 +97,7 @@ def init_sequence(node):
     while node.recv('/interface-panel/{}-pressed'.format(button_and_led_color[team_color])) is False:
         pass
 
-    node.call("/actuator/velocity", ["left-shoulder", 0])
-    node.call("/actuator/velocity", ["right-shoulder", 0])
+    zero_velocity(node)
     node.call("/actuator/led_set", [button_and_led_color[team_color] + '_2', True])
     node.call("/arm/run_zero_homing", None)
 
