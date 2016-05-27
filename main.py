@@ -42,8 +42,8 @@ def zero_velocity(node):
 
 
 def safe_arm_position(node):
-    node.publish('/left-arm/setpoint', [0, 0.14, 0.1, 0.185, 0])
-    node.publish('/right-arm/setpoint', [0, 0.14, -0.1, 0.185, 0])
+    node.publish('/left-arm/setpoint', [5, 0.14, 0.0, 0.185, -pi/2])
+    node.publish('/right-arm/setpoint', [5, 0.14, 0.0, 0.185, pi/2])
     time.sleep(1)
 
 
@@ -120,6 +120,8 @@ def main():
 
     time.sleep(1.1)
 
+    logging.info("ready")
+
     zero_torque(node)
 
     team_color = None
@@ -134,47 +136,67 @@ def main():
     node.publish('/waypoint', [0.6, 0.65, pi/2])
     time.sleep(5)
 
-    # right-pump-5, -12
+    # right-pump-5, 12
     # right-pump-1, 12
     # right-pump-2, 12
     # right-pump-3, 12
     # right-pump-4, -12
 
     # above cylinder
-    node.publish('/right-arm/table-setpoint', [5, 0.9, 0.6, 0.18, pi/2])
+    node.publish('/right-arm/table-setpoint', [5, 0.8, 0.9, 0.24, pi/2])
+    time.sleep(1)
+    node.publish('/right-arm/table-setpoint', [5, 0.9, 0.6, 0.24, pi/2])
     time.sleep(2)
 
     # descend
-    node.publish('/right-arm/table-setpoint', [5, 0.9, 0.6, 0.118, pi/2])
+    node.publish('/right-arm/table-setpoint', [5, 0.9, 0.635, 0.118, pi/2])
     time.sleep(2)
 
-    node.call("/actuator/voltage", ['right-pump-5', -12])
+    node.call("/actuator/voltage", ['right-pump-5', 15])
     time.sleep(2)
     # grab
-    node.publish('/right-arm/table-setpoint', [5, 0.9, 0.65, 0.118, pi/2])
+    node.publish('/right-arm/table-setpoint', [5, 0.9, 0.68, 0.118, pi/2])
     time.sleep(2)
 
     # ascend
-    node.publish('/right-arm/table-setpoint', [5, 0.9, 0.65, 0.18, pi/2])
+    node.publish('/right-arm/table-setpoint', [5, 0.9, 0.68, 0.18, pi/2])
     time.sleep(2)
 
-    node.publish('/right-arm/table-setpoint', [0, 0.9, 0.65, 0.1, 0])
+    # hand over
+    # TODO activate other pump
+    node.publish('/left-arm/setpoint', [5, 0.14, -0.01, 0.185, -1.6])
+    node.publish('/right-arm/setpoint', [5, 0.14, 0.01, 0.185, 1.6])
+    time.sleep(2)
+
+    node.call("/actuator/voltage", ['right-pump-5', 0])
+
+
+    node.publish('/right-arm/table-setpoint', [0, 0.9, 0.65, 0.1, pi])
     time.sleep(2)
     node.call("/actuator/voltage", ['right-pump-1', -12])
     node.call("/actuator/voltage", ['right-pump-2', 12])
     node.call("/actuator/voltage", ['right-pump-3', 12])
     node.call("/actuator/voltage", ['right-pump-4', -12])
     time.sleep(2)
-    node.publish('/right-arm/table-setpoint', [0, 0.9, 0.65, 0.062, 0])
+    node.publish('/right-arm/table-setpoint', [0, 0.9, 0.65, 0.062, pi])
     time.sleep(2)
-    node.publish('/right-arm/table-setpoint', [0, 0.9, 0.65, 0.15, 0])
+    node.publish('/right-arm/table-setpoint', [0, 0.9, 0.65, 0.15, pi])
     time.sleep(2)
 
+    node.publish('/waypoint', [0.57, 1.2, pi/2])
+    time.sleep(5)
+    node.publish('/right-arm/table-setpoint', [0, 0.88, 1.2, 0.15, pi])
+    time.sleep(2)
+    # place blocks in center
+    node.publish('/right-arm/table-setpoint', [0, 0.88, 1.2, 0.07, pi])
+    time.sleep(2)
     node.call("/actuator/voltage", ['right-pump-1', 0])
     node.call("/actuator/voltage", ['right-pump-2', 0])
     node.call("/actuator/voltage", ['right-pump-3', 0])
     node.call("/actuator/voltage", ['right-pump-4', 0])
+    time.sleep(2)
 
+    node.publish('/right-arm/table-setpoint', [0, 0.88, 1.2, 0.15, pi])
 
 
 if __name__ == '__main__':
