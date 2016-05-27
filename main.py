@@ -73,6 +73,28 @@ def set_waypoint(node, team_color, pos):
     node.publish('/waypoint', pos)
 
 
+def is_at_position(node, team_color, target_pos):
+    while True:
+        try:
+            node.recv('/position', timeout=0) # flush queue
+        except queue.Empty:
+            break
+    if team_color is 'green':
+        target_pos = flip_table_xytheta(target_pos)
+    current_pos = node.recv('/position')
+    if (np.linalg.norm(np.array(current_pos[:2]) - np.array(target_pos[:2])) > 0.1
+        or abs(target_pos[2] - current_pos[2]) > 0.1):
+        return False
+    else:
+        return True
+
+
+def goto_waypoint(node, team_color, pos):
+    set_waypoint(node, team_color, pos)
+    while not is_at_position(node, team_color, pos):
+        pass
+
+
 def set_pump(node, team_color, arm, pump, voltage):
     left_pump_dir = {1: -1, 2: 1, 3: -1, 4: 1, 5: -1}
     right_pump_dir = {1: -1, 2: 1, 3: 1, 4: -1, 5: 1}
