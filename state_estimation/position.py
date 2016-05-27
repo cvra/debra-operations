@@ -5,6 +5,7 @@ import numpy as np
 import math
 from math import sin, cos
 import threading
+import logging
 
 
 def periodic_error(angle):
@@ -64,6 +65,7 @@ class PositionEstimator():
         self.position_odometry = np.array(odometry)
 
     def reset(self, pos=[0, 0, 0]):
+        logging.debug('reset position to {}'.format(pos))
         self.x = np.matrix(compute_odometry_offset(pos, self.position_odometry)).T
 
     def update_lidar(self, robot_position):
@@ -102,6 +104,8 @@ def lidar_fix_led_thread(node):
 
 
 def main():
+    logging.basicConfig(level=logging.DEBUG)
+
     global got_lidar_fix
     bus = zmqmsgbus.Bus(sub_addr='ipc://ipc/source',
                         pub_addr='ipc://ipc/sink')

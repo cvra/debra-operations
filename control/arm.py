@@ -10,6 +10,7 @@ import cst_vel_homing
 from math import pi
 import math
 import yaml
+import logging
 
 
 class Arm:
@@ -174,6 +175,8 @@ def table_position_control_thread():
 
 
 def main():
+    logging.basicConfig(level=logging.DEBUG)
+
     bus = zmqmsgbus.Bus(sub_addr='ipc://ipc/source',
                         pub_addr='ipc://ipc/sink')
     node = zmqmsgbus.Node(bus)
@@ -191,6 +194,7 @@ def main():
 
     def zero_homing(arg):
         global l, r, arm_lock
+        logging.debug('perform zero homing')
         with arm_lock:
             endstopper = homing_handler.Endstopper()
             endstopper.add(['left-z'], 30, left_arm_config['actuator']['left-z']['control']['torque_limit'])
@@ -236,7 +240,7 @@ def main():
         except queue.Empty:
             pass
         except ValueError as e:
-            print(e)
+            logging.debug('left arm ' + e)
         try:
             setpoint = node.recv('/right-arm/setpoint', timeout=0)
             with arm_lock:
@@ -249,7 +253,7 @@ def main():
         except queue.Empty:
             pass
         except ValueError as e:
-            print(e)
+            logging.debug('right arm ' + e)
         time.sleep(0.01)
 
 
