@@ -41,7 +41,7 @@ def homing(actuator, velocity, periodic=False):
     def idx_cb(topic, msg):
         seq = msg[1]
         if seq > state['idx_seq_nbr']:  # new index
-            if abs(state['vel']) > velocity * 0.2:
+            if abs(state['vel']) > velocity * 0.1:
                 if state['vel'] > 0:
                     state['idx_p'] = msg[0]
                 else:
