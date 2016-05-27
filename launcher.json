@@ -2,33 +2,27 @@
     "Bus": {
         "command": ["python", "-mzmqmsgbus.tools.bus",
                     "--in", "ipc://ipc/sink", "tcp://*:13370",
-                    "--out", "ipc://ipc/source", "tcp://*:13371"],
-        "restart": true
+                    "--out", "ipc://ipc/source", "tcp://*:13371"]
     },
     "Master Node": {
         "command": ["python", "comm/bus_master_node.py"],
-        "depends": ["Bus"],
-        "restart": true
+        "depends": ["Bus"]
     },
     "Actuator Node": {
         "command": ["python", "comm/actuator_node.py"],
-        "depends": ["Bus"],
-        "restart": true
+        "depends": ["Bus"]
     },
     "Position Estimation Node": {
         "command": ["python", "state_estimation/position.py"],
-        "depends": ["Bus"],
-        "restart": true
+        "depends": ["Bus"]
     },
     "Lidar Driver": {
         "command": ["python", "-m", "sicktim561driver.scan"],
-        "depends": ["Bus"],
-        "restart": true
+        "depends": ["Bus"]
     },
     "Lidar Position Estimation": {
         "command": ["python", "state_estimation/localization-stack/lidar_localization.py", "state_estimation/localization-stack/config.json", "--logs"],
-        "depends": ["Bus", "Lidar Driver"],
-        "restart": true
+        "depends": ["Bus", "Lidar Driver"]
     },
     "Master Node Parameters": {
         "command": ["python", "config/config_send.py",
@@ -62,18 +56,15 @@
     },
     "Proximity Beacon": {
         "command": ["python", "control/proximity_beacon.py"],
-        "depends": ["Bus"],
-        "restart": true
+        "depends": ["Bus"]
     },
     "Arm Control Node": {
         "command": ["python", "control/arm.py", "config/arm-offsets.yaml"],
-        "depends": ["Master Node", "Left Arm Parameters", "Pump Parameters"],
-        "restart": true
+        "depends": ["Master Node", "Left Arm Parameters", "Pump Parameters"]
     },
     "WayPoint Control Node": {
         "command": ["python", "control/waypoints/waypoints.py"],
-        "depends": ["Master Node"],
-        "restart": true
+        "depends": ["Master Node"]
     },
     "Main Script": {
         "command": ["python", "main.py"],
