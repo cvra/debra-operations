@@ -22,12 +22,12 @@ actuator:
                 ilimit: 100.
 
             velocity:
-                kp: 0.2
-                ki: 0.8
+                kp: 0.8
+                ki: 0.4
                 kd: 0.
                 ilimit: 0.13
             position:
-                kp: 6
+                kp: 20
                 ki: 1.
                 kd: 2.
 
