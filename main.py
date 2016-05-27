@@ -3,6 +3,7 @@ import queue
 import time
 import logging
 from math import pi
+import numpy as np
 
 
 table_length = 3
@@ -193,12 +194,12 @@ def main():
     while team_color is None:
         team_color = init_sequence(node)
 
-    set_waypoint(node, team_color, [0.95, 0.17, pi/2])
+    goto_waypoint(node, team_color, [0.95, 0.17, pi/2])
 
     wait_for_start(node)
     logging.info("start!")
 
-    set_waypoint(node, team_color, [0.6, 0.65, pi/2])
+    goto_waypoint(node, team_color, [0.6, 0.65, pi/2])
     time.sleep(5)
 
     # right-pump-5, 12
@@ -248,7 +249,7 @@ def main():
     move_arm_in_table_frame(node, team_color, 'right', [0, 0.9, 0.65, 0.15, pi])
     time.sleep(2)
 
-    set_waypoint(node, team_color, [0.57, 1.2, pi/2])
+    goto_waypoint(node, team_color, [0.57, 1.2, pi/2])
     time.sleep(5)
     move_arm_in_table_frame(node, team_color, 'right', [0, 0.88, 1.2, 0.15, pi])
     time.sleep(2)
