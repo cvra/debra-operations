@@ -234,7 +234,7 @@ def main():
         team_color = init_sequence(node)
 
     wait_for_start(node)
-    threading.Thread(target=kill_after_90_seconds, args=(node,)).start()
+    # threading.Thread(target=kill_after_90_seconds, args=(node,)).start()
     logging.info("start!")
 
     # evade goldorak
@@ -244,32 +244,119 @@ def main():
     move_arm_in_body_frame(node, team_color, 'right', [0, 0.19, -0.06, 0.02, 0])
     move_arm_in_body_frame(node, team_color, 'left', [0, 0.19, 0.06, 0.02, 0])
     goto_waypoint(node, team_color, [0.9, 0.29, pi/2])
+    time.sleep(0.5)
     # push blocks
     goto_waypoint(node, team_color, [0.9, 1.0, pi/2])
-    safe_arm_position(node)
+    time.sleep(0.5)
+    goto_waypoint(node, team_color, [0.9, 0.97, pi/2])
+    time.sleep(0.5)
+    goto_waypoint(node, team_color, [0.9, 0.94, pi/2])
+    move_arm_in_body_frame(node, team_color, 'right', [0, 0.19, -0.06, 0.15, 0])
+    move_arm_in_body_frame(node, team_color, 'left', [0, 0.19, 0.06, 0.15, 0])
+    # safe_arm_position(node)
     time.sleep(1)
     goto_waypoint(node, team_color, [0.9, 0.50, pi])
 
 
     # close door 1
     goto_waypoint(node, team_color, [0.4, 0.3, -pi])
-    set_waypoint(node, team_color, [0.17, 0.3, -pi])
-    time.sleep(1)
-    move_arm_in_table_frame(node, team_color, 'right', [5, -0.02, 0.3, 0.185, -pi])
-    time.sleep(1)
-    safe_arm_position(node)
-    goto_waypoint(node, team_color, [0.2, 0.3, pi])
+    set_waypoint(node, team_color, [0.23, 0.3, -pi])
+    time.sleep(2)
     goto_waypoint(node, team_color, [0.4, 0.3, 0])
 
     # close door 2
     goto_waypoint(node, team_color, [0.4, 0.6, -pi])
-    set_waypoint(node, team_color, [0.17, 0.6, -pi])
-    time.sleep(1)
-    move_arm_in_table_frame(node, team_color, 'right', [5, -0.02, 0.6, 0.185, -pi])
-    time.sleep(1)
-    safe_arm_position(node)
-    goto_waypoint(node, team_color, [0.2, 0.6, pi])
+    set_waypoint(node, team_color, [0.23, 0.6, -pi])
+    time.sleep(2)
     goto_waypoint(node, team_color, [0.4, 0.6, pi])
+
+    # get second block of elements
+    goto_waypoint(node, team_color, [0.35, 0.9, pi/2])
+    time.sleep(1)
+    # move above
+    move_arm_in_table_frame(node, team_color, 'left', [0, 0.068, 0.88, 0.14, 0])
+    set_pump(node, team_color, 'left', 1, 12)
+    set_pump(node, team_color, 'left', 2, 12)
+    set_pump(node, team_color, 'left', 3, 12)
+    set_pump(node, team_color, 'left', 4, 12)
+    time.sleep(2)
+    # grab blocks
+    move_arm_in_table_frame(node, team_color, 'left', [0, 0.068, 0.88, 0.12, 0])
+    time.sleep(1)
+    # move up
+    move_arm_in_table_frame(node, team_color, 'left', [0, 0.068, 0.88, 0.21, 0])
+    time.sleep(1)
+    # move arm behind
+    move_arm_in_body_frame(node, team_color, 'left', [0, -.1, 0, 0.21, 0])
+    time.sleep(1)
+
+    # turn around
+    goto_waypoint(node, team_color, [0.35, 0.9, -pi/2])
+    time.sleep(1)
+    # move above
+    move_arm_in_table_frame(node, team_color, 'right', [0, 0.068, 0.88, 0.08, 0])
+    set_pump(node, team_color, 'right', 1, 12)
+    set_pump(node, team_color, 'right', 2, 12)
+    set_pump(node, team_color, 'right', 3, 12)
+    set_pump(node, team_color, 'right', 4, 12)
+    time.sleep(2)
+    # grab blocks
+    move_arm_in_table_frame(node, team_color, 'right', [0, 0.068, 0.88, 0.06, 0])
+    time.sleep(1)
+    # move up
+    move_arm_in_table_frame(node, team_color, 'right', [0, 0.068, 0.88, 0.21, 0])
+    time.sleep(1)
+    # move arm in front
+    move_arm_in_body_frame(node, team_color, 'right', [0, 0.18, -0.03, 0.21, 0])
+    time.sleep(1)
+
+    # drop right
+    goto_waypoint(node, team_color, [0.6, 1, pi/2])
+    move_arm_in_table_frame(node, team_color, 'right', [0, 0.85, 1, 0.21, 0])
+    time.sleep(1)
+    move_arm_in_table_frame(node, team_color, 'right', [0, 0.85, 1, 0.065, 0])
+    time.sleep(1)
+    set_pump(node, team_color, 'right', 1, -12)
+    set_pump(node, team_color, 'right', 2, -12)
+    set_pump(node, team_color, 'right', 3, -12)
+    set_pump(node, team_color, 'right', 4, -12)
+    time.sleep(1)
+    set_pump(node, team_color, 'right', 1, 0)
+    set_pump(node, team_color, 'right', 2, 0)
+    set_pump(node, team_color, 'right', 3, 0)
+    set_pump(node, team_color, 'right', 4, 0)
+    move_arm_in_body_frame(node, team_color, 'right', [0, 0.18, -0.03, 0.21, 0])
+    time.sleep(1)
+
+    # drop left
+    goto_waypoint(node, team_color, [0.6, 1, -pi/2])
+    move_arm_in_table_frame(node, team_color, 'left', [0, 0.85, 1, 0.21, 0])
+    time.sleep(1)
+    move_arm_in_table_frame(node, team_color, 'left', [0, 0.85, 1, 0.13, 0])
+    time.sleep(1)
+    set_pump(node, team_color, 'left', 1, -12)
+    set_pump(node, team_color, 'left', 2, -12)
+    set_pump(node, team_color, 'left', 3, -12)
+    set_pump(node, team_color, 'left', 4, -12)
+    time.sleep(1)
+    set_pump(node, team_color, 'left', 1, 0)
+    set_pump(node, team_color, 'left', 2, 0)
+    set_pump(node, team_color, 'left', 3, 0)
+    set_pump(node, team_color, 'left', 4, 0)
+    move_arm_in_body_frame(node, team_color, 'left', [0, -.1, 0, 0.21, 0])
+    time.sleep(1)
+
+    # drop all elements
+    time.sleep(10)
+    set_pump(node, team_color, 'left', 1, 0)
+    set_pump(node, team_color, 'left', 2, 0)
+    set_pump(node, team_color, 'left', 3, 0)
+    set_pump(node, team_color, 'left', 4, 0)
+    set_pump(node, team_color, 'right', 1, 0)
+    set_pump(node, team_color, 'right', 2, 0)
+    set_pump(node, team_color, 'right', 3, 0)
+    set_pump(node, team_color, 'right', 4, 0)
+
 
 if __name__ == '__main__':
     main()

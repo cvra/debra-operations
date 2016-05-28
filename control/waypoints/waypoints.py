@@ -92,7 +92,7 @@ class PID:
 class WayPoint:
     def __init__(self):
         self.frequency = 50 # [Hz]
-        self.target_position_tolerance = 0.03 # [m]
+        self.target_position_tolerance = 0.05 # [m]
         self.waypoints_distance_limit = 0.4 # [m]
         self.rotation_speed = 0.5 # [rad/s]
         self.heading_pid = PID(kp=15,ki=0.,kd=1,ilimit=0,freq=self.frequency)

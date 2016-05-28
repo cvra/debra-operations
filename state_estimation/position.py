@@ -80,7 +80,7 @@ class PositionEstimator():
         H = np.matrix([[1, 0, -sin(self.x[2])*self.position_odometry[0]-cos(self.x[2])*self.position_odometry[1]],
                        [0, 1, cos(self.x[2])*self.position_odometry[0]-sin(self.x[2])*self.position_odometry[1]],
                        [0, 0, 1]])
-        R = np.matrix(np.diag([0.03, 0.03, 0.05]))
+        R = np.matrix(np.diag([0.15, 0.15, 0.05]))
         self.x, self.P = kalman_measurement_update(self.x, self.P, z_minus_h_of_x, H, R)
 
     def get_position(self):
