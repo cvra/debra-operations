@@ -119,7 +119,7 @@ def set_pump(node, team_color, arm, pump, voltage):
 
 def safe_arm_position(node):
     with actuator_lock:
-        node.publish('/left-arm/setpoint', [0, 0.145, 0.04, 0.135, -pi/2])
+        node.publish('/left-arm/setpoint', [0, 0.145, 0.04, 0.185, -pi/2])
         node.publish('/right-arm/setpoint', [0, 0.145, -0.04, 0.135, pi/2])
     time.sleep(1)
 
@@ -176,7 +176,7 @@ def wait_for_start(node):
 
 def init_sequence(node):
     zero_velocity(node)
-    #node.call("/arm/run_zero_homing", None)
+    node.call("/arm/run_zero_homing", None)
     zero_torque(node)
     safe_arm_position(node)
 
@@ -237,19 +237,86 @@ def main():
     threading.Thread(target=kill_after_90_seconds, args=(node,)).start()
     logging.info("start!")
 
-    # evade goldorak
-    goto_waypoint(node, team_color, [0.66, 0.18, pi/2])
-    time.sleep(2)
-    # position behind blocks
-    #move_arm_in_body_frame(node, team_color, 'right', [0, 0.19, -0.06, 0.02, 0])
-    move_arm_in_body_frame(node, team_color, 'left', [0, 0.19, 0.0, 0.02, 0])
-    goto_waypoint(node, team_color, [0.9, 0.29, pi/2])
-    # push blocks
-    goto_waypoint(node, team_color, [0.9, 1.0, pi/2])
-    safe_arm_position(node)
-    time.sleep(1)
-    goto_waypoint(node, team_color, [0.9, 0.50, pi])
+    goto_waypoint(node, team_color, [0.4, 0.4, pi/2])
 
+    # go to take blocks
+    goto_waypoint(node, team_color, [0.63, 0.6, pi/2])
+    time.sleep(0.5)
+
+    # above cylinder
+    move_arm_in_table_frame(node, team_color, 'right', [5, 0.8, 0.9, 0.24, pi/2])
+    time.sleep(1)
+    move_arm_in_table_frame(node, team_color, 'right', [5, 0.9, 0.635, 0.24, pi/2])
+    time.sleep(2)
+
+    # descend
+    move_arm_in_table_frame(node, team_color, 'right', [5, 0.9, 0.635, 0.118, pi/2])
+    time.sleep(2)
+
+    set_pump(node, team_color, 'right', 5, 15)
+    time.sleep(2)
+    # grab
+    move_arm_in_table_frame(node, team_color, 'right', [5, 0.9, 0.68, 0.118, pi/2])
+    time.sleep(2)
+
+    # ascend
+    move_arm_in_table_frame(node, team_color, 'right', [5, 0.9, 0.68, 0.18, pi/2])
+    time.sleep(2)
+
+    # hand over
+    set_pump(node, team_color, 'left', 5, 15)
+    move_arm_in_body_frame(node, team_color, 'left', [5, 0.14, -0.01, 0.185, -1.6])
+    move_arm_in_body_frame(node, team_color, 'right', [5, 0.14, -0.03, 0.205, 1.6])
+    time.sleep(2)
+    move_arm_in_body_frame(node, team_color, 'right', [5, 0.14, 0.00, 0.205, 1.6])
+    time.sleep(2)
+    set_pump(node, team_color, 'right', 5, -12) # push a little
+    time.sleep(2)
+    set_pump(node, team_color, 'right', 5, 0)
+
+    move_arm_in_table_frame(node, team_color, 'right', [0, 0.9, 0.65, 0.1, pi])
+    set_pump(node, team_color, 'right', 1, 12)
+    set_pump(node, team_color, 'right', 2, 12)
+    set_pump(node, team_color, 'right', 3, 12)
+    set_pump(node, team_color, 'right', 4, 12)
+    time.sleep(2)
+    move_arm_in_table_frame(node, team_color, 'right', [0, 0.9, 0.65, 0.06, pi])
+    time.sleep(1)
+    move_arm_in_table_frame(node, team_color, 'right', [0, 0.9, 0.65, 0.15, pi])
+    time.sleep(0.5)
+
+    goto_waypoint(node, team_color, [0.57, 1.2, pi/2])
+    time.sleep(0.5)
+    move_arm_in_table_frame(node, team_color, 'right', [0, 0.88, 1.2, 0.15, pi])
+    time.sleep(2)
+    # place blocks in center
+    move_arm_in_table_frame(node, team_color, 'right', [0, 0.88, 1.2, 0.07, pi])
+    time.sleep(2)
+    set_pump(node, team_color, 'right', 1, -12)
+    set_pump(node, team_color, 'right', 2, -12)
+    set_pump(node, team_color, 'right', 3, -12)
+    set_pump(node, team_color, 'right', 4, -12)
+    move_arm_in_table_frame(node, team_color, 'right', [0, 0.88, 1.2, 0.15, pi])
+    time.sleep(2)
+    set_pump(node, team_color, 'right', 1, 0)
+    set_pump(node, team_color, 'right', 2, 0)
+    set_pump(node, team_color, 'right', 3, 0)
+    set_pump(node, team_color, 'right', 4, 0)
+
+    move_arm_in_body_frame(node, team_color, 'right', [0, 0.145, -0.04, 0.135, pi/2]) # retract right arm
+    time.sleep(1)
+    goto_waypoint(node, team_color, [0.57, 1.2, -pi/2])
+
+    move_arm_in_table_frame(node, team_color, 'left', [5, 0.88, 1.2, 0.18, 0])
+    time.sleep(2) # place cylinder in center
+    move_arm_in_table_frame(node, team_color, 'left', [5, 0.88, 1.2, 0.13, 0])
+    time.sleep(1)
+    set_pump(node, team_color, 'left', 5, 0)
+    move_arm_in_table_frame(node, team_color, 'left', [5, 0.88, 1.2, 0.22, 0])
+    time.sleep(1)
+
+    safe_arm_position(node)
+    time.sleep(2)
 
     # close door 1
     goto_waypoint(node, team_color, [0.4, 0.3, -pi])
