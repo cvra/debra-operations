@@ -223,7 +223,7 @@ def main():
                         pub_addr='ipc://ipc/sink')
     node = zmqmsgbus.Node(bus)
 
-    time.sleep(2)
+    time.sleep(4)
 
     logging.info("ready")
 
@@ -239,8 +239,9 @@ def main():
 
     goto_waypoint(node, team_color, [0.4, 0.4, pi/2])
 
-    goto_waypoint(node, team_color, [0.6, 0.65, pi/2])
-    time.sleep(5)
+    # go to take blocks
+    goto_waypoint(node, team_color, [0.63, 0.6, pi/2])
+    time.sleep(0.5)
 
     # above cylinder
     move_arm_in_table_frame(node, team_color, 'right', [5, 0.8, 0.9, 0.24, pi/2])
@@ -286,7 +287,7 @@ def main():
     time.sleep(2)
 
     goto_waypoint(node, team_color, [0.57, 1.2, pi/2])
-    time.sleep(5)
+    time.sleep(0.5)
     move_arm_in_table_frame(node, team_color, 'right', [0, 0.88, 1.2, 0.15, pi])
     time.sleep(2)
     # place blocks in center
@@ -296,27 +297,40 @@ def main():
     set_pump(node, team_color, 'right', 2, 0)
     set_pump(node, team_color, 'right', 3, 0)
     set_pump(node, team_color, 'right', 4, 0)
-
-    set_pump(node, team_color, 'left', 5, 0)
-    time.sleep(2)
-
     move_arm_in_table_frame(node, team_color, 'right', [0, 0.88, 1.2, 0.15, pi])
-
     time.sleep(2)
+
+    move_arm_in_body_frame(node, team_color, 'right', [0, 0.145, -0.04, 0.135, pi/2]) # retract right arm
+    goto_waypoint(node, team_color, [0.57, 1.2, -pi/2])
+
+    move_arm_in_table_frame(node, team_color, 'left', [5, 0.88, 1.2, 0.18, 0])
+    time.sleep(2) # place cylinder in center
+    move_arm_in_table_frame(node, team_color, 'left', [5, 0.88, 1.2, 0.13, 0])
+    time.sleep(1)
+    set_pump(node, team_color, 'left', 5, 0)
+    move_arm_in_table_frame(node, team_color, 'left', [5, 0.88, 1.2, 0.18, 0])
+    time.sleep(1)
+
     safe_arm_position(node)
     time.sleep(2)
 
+    # close door 1
     goto_waypoint(node, team_color, [0.4, 0.3, -pi])
-    goto_waypoint(node, team_color, [0.2, 0.3, -pi])
-    goto_waypoint(node, team_color, [0.25, 0.3, -pi])
-    goto_waypoint(node, team_color, [0.3, 0.3, -pi])
-    goto_waypoint(node, team_color, [0.4, 0.3, -pi])
+    goto_waypoint(node, team_color, [0.17, 0.3, -pi])
+    move_arm_in_table_frame(node, team_color, 'right', [5, -0.02, 0.3, 0.185, -pi])
+    time.sleep(1)
+    safe_arm_position(node)
+    goto_waypoint(node, team_color, [0.2, 0.3, pi])
+    goto_waypoint(node, team_color, [0.4, 0.3, 0])
 
+    # close door 2
     goto_waypoint(node, team_color, [0.4, 0.6, -pi])
-    goto_waypoint(node, team_color, [0.2, 0.6, -pi])
-    goto_waypoint(node, team_color, [0.25, 0.6, -pi])
-    goto_waypoint(node, team_color, [0.3, 0.6, -pi])
-    goto_waypoint(node, team_color, [0.4, 0.6, -pi])
+    goto_waypoint(node, team_color, [0.17, 0.6, -pi])
+    move_arm_in_table_frame(node, team_color, 'right', [5, -0.02, 0.6, 0.185, -pi])
+    time.sleep(1)
+    safe_arm_position(node)
+    goto_waypoint(node, team_color, [0.2, 0.6, pi])
+    goto_waypoint(node, team_color, [0.4, 0.6, pi])
 
 if __name__ == '__main__':
     main()
