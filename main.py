@@ -119,8 +119,8 @@ def set_pump(node, team_color, arm, pump, voltage):
 
 def safe_arm_position(node):
     with actuator_lock:
-        node.publish('/left-arm/setpoint', [5, 0.14, 0.0, 0.185, -pi/2])
-        node.publish('/right-arm/setpoint', [5, 0.14, 0.0, 0.185, pi/2])
+        node.publish('/left-arm/setpoint', [0, 0.145, 0.04, 0.185, -pi/2])
+        node.publish('/right-arm/setpoint', [0, 0.145, -0.04, 0.135, pi/2])
     time.sleep(1)
 
 
@@ -225,14 +225,10 @@ def main():
     threading.Thread(target=kill_after_90_seconds, args=(node,)).start()
     logging.info("start!")
 
+    goto_waypoint(node, team_color, [0.4, 0.4, pi/2])
+
     goto_waypoint(node, team_color, [0.6, 0.65, pi/2])
     time.sleep(5)
-
-    # right-pump-5, 12
-    # right-pump-1, 12
-    # right-pump-2, 12
-    # right-pump-3, 12
-    # right-pump-4, -12
 
     # above cylinder
     move_arm_in_table_frame(node, team_color, 'right', [5, 0.8, 0.9, 0.24, pi/2])
@@ -256,7 +252,7 @@ def main():
 
     # hand over
     set_pump(node, team_color, 'left', 5, 15)
-    move_arm_in_body_frame(node, team_color, 'left', [5, 0.14, -0.01, 0.185, -1.6])
+    move_arm_in_body_frame(node, team_color, 'left', [5, 0.14, -0.01, 0.185, -1.4])
     move_arm_in_body_frame(node, team_color, 'right', [5, 0.14, 0.01, 0.205, 1.6])
     time.sleep(2)
     set_pump(node, team_color, 'right', 5, -12) # push a little
