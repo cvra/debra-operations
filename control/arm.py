@@ -11,7 +11,7 @@ from math import pi
 import math
 import yaml
 import logging
-
+import threading
 
 class Arm:
     """
@@ -206,19 +206,25 @@ def main():
             l.set_zeros({a[len('left-'):]: z * offsets[a + '-dir'] for a, z in endstopper_zeros.items() if 'left-' in a})
             r.set_zeros({a[len('right-'):]: z * offsets[a + '-dir'] for a, z in endstopper_zeros.items() if 'right-' in a})
 
+            def zero_sequence(side):
+                global l, r
+                if side == left:
+                    arm = l
+                else
+                    arm = r
+                arm.set_zeros({'shoulder': cst_vel_homing.homing(side+'-shoulder', 2)
+                                              * offsets[side+'-shoulder-dir']})
+                arm.set_zeros({'elbow': cst_vel_homing.homing(side+'-elbow', 2)
+                                              * offsets[side+'-elbow-dir']})
+                arm.set_zeros({'wrist': cst_vel_homing.homing(side+'-wrist', 2, periodic=True)
+                                              * offsets[side+'-wrist-dir']})
 
-            l.set_zeros({'shoulder': cst_vel_homing.homing('left-shoulder', 2)
-                                          * offsets['left-shoulder-dir']})
-            l.set_zeros({'elbow': cst_vel_homing.homing('left-elbow', 2)
-                                          * offsets['left-elbow-dir']})
-            l.set_zeros({'wrist': cst_vel_homing.homing('left-wrist', 2, periodic=True)
-                                          * offsets['left-wrist-dir']})
-            r.set_zeros({'shoulder': cst_vel_homing.homing('right-shoulder', 2)
-                                          * offsets['right-shoulder-dir']})
-            r.set_zeros({'elbow': cst_vel_homing.homing('right-elbow', 2)
-                                          * offsets['right-elbow-dir']})
-            r.set_zeros({'wrist': cst_vel_homing.homing('right-wrist', 2, periodic=True)
-                                          * offsets['right-wrist-dir']})
+            left = threading.Thread(target=zero_sequence, args=('left',))
+            left.start()
+            right = threading.Thread(target=zero_sequence, args=('right',))
+            right.start()
+            left.join()
+            right.join()
 
             l.move_hand(0.212, 0, 0.18, 0)
             r.move_hand(0.212, 0, 0.18, 0)
