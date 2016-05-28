@@ -11,8 +11,9 @@ actuator_lock = threading.RLock()
 
 table_length = 3
 table_width = 2
-start_position = {'violet': [0.85, 0.129, -pi/2],
-                  'green': [0.85, table_length - 0.129, +pi/2]}
+# debra width 205mm
+start_position = {'violet': [0.4975, 0.129, -pi/2],
+                  'green': [0.4975, table_length - 0.129, +pi/2]}
 
 
 enemy_color = {'violet': 'green', 'green': 'violet'}
