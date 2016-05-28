@@ -234,7 +234,7 @@ def main():
         team_color = init_sequence(node)
 
     wait_for_start(node)
-    # threading.Thread(target=kill_after_90_seconds, args=(node,)).start()
+    threading.Thread(target=kill_after_90_seconds, args=(node,)).start()
     logging.info("start!")
 
     # evade goldorak
