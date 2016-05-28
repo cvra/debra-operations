@@ -156,13 +156,17 @@ def get_start_color(node):
 
 def wait_for_start(node):
     node.call("/actuator/led_set", ["ready", False])
-    while True:
+    node.call("/actuator/torque", ["left-wheel", 0])
+    node.call("/actuator/torque", ["right-wheel", 0])
+    while True: # wait to plug start
         start = node.recv('/interface-panel/start')
         if start is False:
             break
     node.call("/actuator/led_set", ["ready", True])
+    node.call("/actuator/velocity", ["left-wheel", 0])
+    node.call("/actuator/velocity", ["right-wheel", 0])
 
-    while True:
+    while True: # start unplugged
         start = node.recv('/interface-panel/start')
         if start is True:
             break
