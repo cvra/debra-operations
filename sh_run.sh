@@ -17,12 +17,12 @@ python state_estimation/localization-stack/lidar_localization.py state_estimatio
 sleep 3
 python config/config_send.py -w config/config.yaml &
 sleep 3
-python config/config_send.py -w config/config-right-arm.yaml &
-sleep 3
-python config/config_send.py -w config/config-left-arm.yaml &
-sleep 3
-python config/config_send.py -w config/config-pumps.yaml &
-sleep 3
+#python config/config_send.py -w config/config-right-arm.yaml &
+#sleep 3
+#python config/config_send.py -w config/config-left-arm.yaml &
+#sleep 3
+#python config/config_send.py -w config/config-pumps.yaml &
+#sleep 3
 python control/proximity_beacon.py  2>&1 | tee logs/beacon &
 python control/arm.py config/arm-offsets.yaml  2>&1 | tee logs/arm &
 python control/waypoints/waypoints.py  2>&1 | tee logs/waypoints &

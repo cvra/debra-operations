@@ -201,10 +201,10 @@ def main():
         with arm_lock:
             endstopper = homing_handler.Endstopper()
             endstopper.add(['left-z'], 30, left_arm_config['actuator']['left-z']['control']['torque_limit'])
-            endstopper.add(['right-z'], 30, right_arm_config['actuator']['right-z']['control']['torque_limit'])
+            #endstopper.add(['right-z'], 30, right_arm_config['actuator']['right-z']['control']['torque_limit'])
             endstopper_zeros = endstopper.start()
-            l.set_zeros({a[len('left-'):]: z * offsets[a + '-dir'] for a, z in endstopper_zeros.items() if 'left-' in a})
-            r.set_zeros({a[len('right-'):]: z * offsets[a + '-dir'] for a, z in endstopper_zeros.items() if 'right-' in a})
+            #l.set_zeros({a[len('left-'):]: z * offsets[a + '-dir'] for a, z in endstopper_zeros.items() if 'left-' in a})
+            #r.set_zeros({a[len('right-'):]: z * offsets[a + '-dir'] for a, z in endstopper_zeros.items() if 'right-' in a})
 
 
             l.set_zeros({'shoulder': cst_vel_homing.homing('left-shoulder', 2)
@@ -213,12 +213,12 @@ def main():
                                           * offsets['left-elbow-dir']})
             l.set_zeros({'wrist': cst_vel_homing.homing('left-wrist', 2, periodic=True)
                                           * offsets['left-wrist-dir']})
-            r.set_zeros({'shoulder': cst_vel_homing.homing('right-shoulder', 2)
-                                          * offsets['right-shoulder-dir']})
-            r.set_zeros({'elbow': cst_vel_homing.homing('right-elbow', 2)
-                                          * offsets['right-elbow-dir']})
-            r.set_zeros({'wrist': cst_vel_homing.homing('right-wrist', 2, periodic=True)
-                                          * offsets['right-wrist-dir']})
+           # r.set_zeros({'shoulder': cst_vel_homing.homing('right-shoulder', 2)
+           #                               * offsets['right-shoulder-dir']})
+           # r.set_zeros({'elbow': cst_vel_homing.homing('right-elbow', 2)
+           #                               * offsets['right-elbow-dir']})
+           # r.set_zeros({'wrist': cst_vel_homing.homing('right-wrist', 2, periodic=True)
+           #                               * offsets['right-wrist-dir']})
 
             l.move_hand(0.212, 0, 0.18, 0)
             r.move_hand(0.212, 0, 0.18, 0)
