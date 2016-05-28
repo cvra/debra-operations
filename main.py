@@ -204,6 +204,16 @@ def kill_after_90_seconds(node):
     while True:
         node.publish('/waypoint', None)
         zero_velocity(node)
+        set_pump(node, 'violet', 'left', 1, 0)
+        set_pump(node, 'violet', 'left', 2, 0)
+        set_pump(node, 'violet', 'left', 3, 0)
+        set_pump(node, 'violet', 'left', 4, 0)
+        set_pump(node, 'violet', 'left', 5, 0)
+        set_pump(node, 'violet', 'right', 1, 0)
+        set_pump(node, 'violet', 'right', 2, 0)
+        set_pump(node, 'violet', 'right', 3, 0)
+        set_pump(node, 'violet', 'right', 4, 0)
+        set_pump(node, 'violet', 'right', 5, 0)
 
 
 def main():
