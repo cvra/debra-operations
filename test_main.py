@@ -30,4 +30,4 @@ class TestMapping(unittest.TestCase):
     def test_set_pump(self):
         node = Mock()
         main.set_pump(node, 'green', 'left', 1, 12)
-        node.call.assert_called_once_with('/actuator/voltage', ['right-pump-2', -12])
+        node.call.assert_called_once_with('/actuator/voltage', ['right-pump-2', 12])
