@@ -31,3 +31,8 @@ python main.py 2>&1 | tee logs/main &
 trap "jobs -p | xargs kill" SIGINT
 trap "jobs -p | xargs kill" EXIT
 read
+read
+read
+read
+read
+read
