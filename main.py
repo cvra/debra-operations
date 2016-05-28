@@ -320,7 +320,8 @@ def main():
 
     # close door 1
     goto_waypoint(node, team_color, [0.4, 0.3, -pi])
-    goto_waypoint(node, team_color, [0.17, 0.3, -pi])
+    set_waypoint(node, team_color, [0.17, 0.3, -pi])
+    time.sleep(1)
     move_arm_in_table_frame(node, team_color, 'right', [5, -0.02, 0.3, 0.185, -pi])
     time.sleep(1)
     safe_arm_position(node)
@@ -329,7 +330,8 @@ def main():
 
     # close door 2
     goto_waypoint(node, team_color, [0.4, 0.6, -pi])
-    goto_waypoint(node, team_color, [0.17, 0.6, -pi])
+    set_waypoint(node, team_color, [0.17, 0.6, -pi])
+    time.sleep(1)
     move_arm_in_table_frame(node, team_color, 'right', [5, -0.02, 0.6, 0.185, -pi])
     time.sleep(1)
     safe_arm_position(node)
