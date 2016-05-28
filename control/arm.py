@@ -208,9 +208,9 @@ def main():
 
             def zero_sequence(side):
                 global l, r
-                if side == left:
+                if side == 'left':
                     arm = l
-                else
+                else:
                     arm = r
                 arm.set_zeros({'shoulder': cst_vel_homing.homing(side+'-shoulder', 2)
                                               * offsets[side+'-shoulder-dir']})
