@@ -4,7 +4,10 @@ import time
 import logging
 from math import pi
 import numpy as np
+import threading
 
+
+actuator_lock = threading.RLock()
 
 table_length = 3
 table_width = 2
@@ -26,29 +29,31 @@ def flip_table_xytheta(xytheta):
 
 
 def zero_torque(node):
-    node.call("/actuator/torque", ["left-wheel", 0])
-    node.call("/actuator/torque", ["right-wheel", 0])
-    node.call("/actuator/torque", ["left-z", 0])
-    node.call("/actuator/torque", ["left-elbow", 0])
-    node.call("/actuator/torque", ["left-wrist", 0])
-    node.call("/actuator/torque", ["right-z", 0])
-    node.call("/actuator/torque", ["right-elbow", 0])
-    node.call("/actuator/torque", ["right-wrist", 0])
-    node.call("/actuator/torque", ["left-shoulder", 0])
-    node.call("/actuator/torque", ["right-shoulder", 0])
+    with actuator_lock:
+        node.call("/actuator/torque", ["left-wheel", 0])
+        node.call("/actuator/torque", ["right-wheel", 0])
+        node.call("/actuator/torque", ["left-z", 0])
+        node.call("/actuator/torque", ["left-elbow", 0])
+        node.call("/actuator/torque", ["left-wrist", 0])
+        node.call("/actuator/torque", ["right-z", 0])
+        node.call("/actuator/torque", ["right-elbow", 0])
+        node.call("/actuator/torque", ["right-wrist", 0])
+        node.call("/actuator/torque", ["left-shoulder", 0])
+        node.call("/actuator/torque", ["right-shoulder", 0])
 
 
 def zero_velocity(node):
-    node.call("/actuator/velocity", ["left-wheel", 0])
-    node.call("/actuator/velocity", ["right-wheel", 0])
-    node.call("/actuator/velocity", ["left-z", 0])
-    node.call("/actuator/velocity", ["left-elbow", 0])
-    node.call("/actuator/velocity", ["left-wrist", 0])
-    node.call("/actuator/velocity", ["right-z", 0])
-    node.call("/actuator/velocity", ["right-elbow", 0])
-    node.call("/actuator/velocity", ["right-wrist", 0])
-    node.call("/actuator/velocity", ["left-shoulder", 0])
-    node.call("/actuator/velocity", ["right-shoulder", 0])
+    with actuator_lock:
+        node.call("/actuator/velocity", ["left-wheel", 0])
+        node.call("/actuator/velocity", ["right-wheel", 0])
+        node.call("/actuator/velocity", ["left-z", 0])
+        node.call("/actuator/velocity", ["left-elbow", 0])
+        node.call("/actuator/velocity", ["left-wrist", 0])
+        node.call("/actuator/velocity", ["right-z", 0])
+        node.call("/actuator/velocity", ["right-elbow", 0])
+        node.call("/actuator/velocity", ["right-wrist", 0])
+        node.call("/actuator/velocity", ["left-shoulder", 0])
+        node.call("/actuator/velocity", ["right-shoulder", 0])
 
 
 def move_arm_in_table_frame(node, team_color, arm, pos):
@@ -56,7 +61,8 @@ def move_arm_in_table_frame(node, team_color, arm, pos):
         arm = flip_left_right[arm]
         pos[1], pos[2], pos[4] = flip_table_xytheta([pos[1], pos[2], pos[4]])
         pos[0] = flip_hand_tool[pos[0]]
-    node.publish('/{}-arm/table-setpoint'.format(arm), pos)
+    with actuator_lock:
+        node.publish('/{}-arm/table-setpoint'.format(arm), pos)
 
 
 def move_arm_in_body_frame(node, team_color, arm, pos):
@@ -65,13 +71,15 @@ def move_arm_in_body_frame(node, team_color, arm, pos):
         pos[2] = - pos[2] # flip y
         pos[4] = - pos[4] # flip theta
         pos[0] = flip_hand_tool[pos[0]]
-    node.publish('/{}-arm/setpoint'.format(arm), pos)
+    with actuator_lock:
+        node.publish('/{}-arm/setpoint'.format(arm), pos)
 
 
 def set_waypoint(node, team_color, pos):
     if team_color is 'green':
         pos = flip_table_xytheta(pos)
-    node.publish('/waypoint', pos)
+    with actuator_lock:
+        node.publish('/waypoint', pos)
 
 
 def is_at_position(node, team_color, target_pos):
@@ -104,12 +112,14 @@ def set_pump(node, team_color, arm, pump, voltage):
     if team_color is 'green':
         arm = flip_left_right[arm]
         pump = flip_hand_tool[pump]
-    node.call('/actuator/voltage', ['{}-pump-{}'.format(arm, pump), pump_dir[arm][pump] * voltage])
+    with actuator_lock:
+        node.call('/actuator/voltage', ['{}-pump-{}'.format(arm, pump), pump_dir[arm][pump] * voltage])
 
 
 def safe_arm_position(node):
-    node.publish('/left-arm/setpoint', [5, 0.14, 0.0, 0.185, -pi/2])
-    node.publish('/right-arm/setpoint', [5, 0.14, 0.0, 0.185, pi/2])
+    with actuator_lock:
+        node.publish('/left-arm/setpoint', [5, 0.14, 0.0, 0.185, -pi/2])
+        node.publish('/right-arm/setpoint', [5, 0.14, 0.0, 0.185, pi/2])
     time.sleep(1)
 
 
@@ -177,6 +187,14 @@ def init_sequence(node):
     return team_color
 
 
+def kill_after_90_seconds(node):
+    time.sleep(89)
+    actuator_lock.acquire() # block everything
+    while True:
+        node.publish('/waypoint', None)
+        zero_velocity(node)
+
+
 def main():
     logging.basicConfig(level=logging.DEBUG)
 
@@ -197,6 +215,7 @@ def main():
     goto_waypoint(node, team_color, [0.95, 0.17, pi/2])
 
     wait_for_start(node)
+    threading.Thread(target=kill_after_90_seconds, args=(node,))
     logging.info("start!")
 
     goto_waypoint(node, team_color, [0.6, 0.65, pi/2])
