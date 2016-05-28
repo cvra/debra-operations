@@ -188,8 +188,12 @@ def init_sequence(node):
 
 
 def kill_after_90_seconds(node):
+    logging.info("kill thread armed")
     time.sleep(89)
+    logging.info("90 seconds over; trying lock actuators")
     actuator_lock.acquire() # block everything
+    logging.info("actuators locked")
+    node.call("/actuator/led_set", ["ready", True])
     while True:
         node.publish('/waypoint', None)
         zero_velocity(node)
@@ -212,10 +216,8 @@ def main():
     while team_color is None:
         team_color = init_sequence(node)
 
-    goto_waypoint(node, team_color, [0.95, 0.17, pi/2])
-
     wait_for_start(node)
-    threading.Thread(target=kill_after_90_seconds, args=(node,))
+    threading.Thread(target=kill_after_90_seconds, args=(node,)).start()
     logging.info("start!")
 
     goto_waypoint(node, team_color, [0.6, 0.65, pi/2])
