@@ -175,6 +175,11 @@ def wait_for_start(node):
 
 
 def init_sequence(node):
+    zero_velocity(node)
+    node.call("/arm/run_zero_homing", None)
+    zero_torque(node)
+    safe_arm_position(node)
+
     team_color = get_start_color(node)
     logging.info(team_color)
 
@@ -184,10 +189,7 @@ def init_sequence(node):
     while node.recv('/interface-panel/{}-pressed'.format(button_and_led_color[team_color])) is False:
         pass
 
-    zero_velocity(node)
     node.call("/actuator/led_set", [button_and_led_color[team_color] + '_2', True])
-    node.call("/arm/run_zero_homing", None)
-    safe_arm_position(node)
 
     return team_color
 
