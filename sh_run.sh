@@ -13,7 +13,7 @@ python comm/bus_master_node.py  2>&1 | tee logs/master &
 python comm/actuator_node.py  2>&1 | tee logs/bus &
 python state_estimation/position.py  2>&1 | tee logs/position &
 python -m sicktim561driver.scan  2>&1 | tee logs/lidar_driver &
-# python state_estimation/localization-stack/lidar_localization.py state_estimation/localization-stack/config.json --logs  2>&1 | tee logs/lidar_position &
+python state_estimation/localization-stack/lidar_localization.py state_estimation/localization-stack/config.json --logs  2>&1 | tee logs/lidar_position &
 sleep 3
 python config/config_send.py -w config/config.yaml &
 sleep 3

@@ -223,7 +223,7 @@ def main():
                         pub_addr='ipc://ipc/sink')
     node = zmqmsgbus.Node(bus)
 
-    time.sleep(1.1)
+    time.sleep(2)
 
     logging.info("ready")
 
@@ -245,7 +245,7 @@ def main():
     # above cylinder
     move_arm_in_table_frame(node, team_color, 'right', [5, 0.8, 0.9, 0.24, pi/2])
     time.sleep(1)
-    move_arm_in_table_frame(node, team_color, 'right', [5, 0.9, 0.6, 0.24, pi/2])
+    move_arm_in_table_frame(node, team_color, 'right', [5, 0.9, 0.635, 0.24, pi/2])
     time.sleep(2)
 
     # descend
@@ -264,8 +264,10 @@ def main():
 
     # hand over
     set_pump(node, team_color, 'left', 5, 15)
-    move_arm_in_body_frame(node, team_color, 'left', [5, 0.14, -0.01, 0.185, -1.4])
-    move_arm_in_body_frame(node, team_color, 'right', [5, 0.14, 0.01, 0.205, 1.6])
+    move_arm_in_body_frame(node, team_color, 'left', [5, 0.14, -0.01, 0.185, -1.6])
+    move_arm_in_body_frame(node, team_color, 'right', [5, 0.14, -0.03, 0.205, 1.6])
+    time.sleep(2)
+    move_arm_in_body_frame(node, team_color, 'right', [5, 0.14, 0.00, 0.205, 1.6])
     time.sleep(2)
     set_pump(node, team_color, 'right', 5, -12) # push a little
     time.sleep(2)
@@ -302,6 +304,19 @@ def main():
 
     time.sleep(2)
     safe_arm_position(node)
+    time.sleep(2)
+
+    goto_waypoint(node, team_color, [0.4, 0.3, -pi])
+    goto_waypoint(node, team_color, [0.2, 0.3, -pi])
+    goto_waypoint(node, team_color, [0.25, 0.3, -pi])
+    goto_waypoint(node, team_color, [0.3, 0.3, -pi])
+    goto_waypoint(node, team_color, [0.4, 0.3, -pi])
+
+    goto_waypoint(node, team_color, [0.4, 0.6, -pi])
+    goto_waypoint(node, team_color, [0.2, 0.6, -pi])
+    goto_waypoint(node, team_color, [0.25, 0.6, -pi])
+    goto_waypoint(node, team_color, [0.3, 0.6, -pi])
+    goto_waypoint(node, team_color, [0.4, 0.6, -pi])
 
 if __name__ == '__main__':
     main()
