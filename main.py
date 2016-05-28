@@ -312,7 +312,7 @@ def main():
     move_arm_in_table_frame(node, team_color, 'left', [5, 0.88, 1.2, 0.13, 0])
     time.sleep(1)
     set_pump(node, team_color, 'left', 5, 0)
-    move_arm_in_table_frame(node, team_color, 'left', [5, 0.88, 1.2, 0.18, 0])
+    move_arm_in_table_frame(node, team_color, 'left', [5, 0.88, 1.2, 0.22, 0])
     time.sleep(1)
 
     safe_arm_position(node)
