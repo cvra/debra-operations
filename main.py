@@ -273,13 +273,16 @@ def main():
     # get second block of elements
     goto_waypoint(node, team_color, [0.35, 0.9, pi/2])
     time.sleep(1)
-    # move above
-    move_arm_in_table_frame(node, team_color, 'left', [0, 0.068, 0.88, 0.14, 0])
+    # sweep off tower
+    move_arm_in_table_frame(node, team_color, 'left', [0, 0.068, 0.84, 0.14, 0])
     set_pump(node, team_color, 'left', 1, 12)
     set_pump(node, team_color, 'left', 2, 12)
     set_pump(node, team_color, 'left', 3, 12)
     set_pump(node, team_color, 'left', 4, 12)
     time.sleep(2)
+    # move above
+    move_arm_in_table_frame(node, team_color, 'left', [0, 0.068, 0.88, 0.14, 0])
+    time.sleep(1)
     # grab blocks
     move_arm_in_table_frame(node, team_color, 'left', [0, 0.068, 0.88, 0.12, 0])
     time.sleep(1)
@@ -291,15 +294,20 @@ def main():
     time.sleep(1)
 
     # turn around
-    goto_waypoint(node, team_color, [0.35, 0.9, -pi/2])
+    goto_waypoint(node, team_color, [0.35, 0.86, -pi/2])
     time.sleep(1)
-    # move above
-    move_arm_in_table_frame(node, team_color, 'right', [0, 0.068, 0.88, 0.08, 0])
+    # do sweep movement to be sure
+    move_arm_in_table_frame(node, team_color, 'right', [0, 0.068, 0.76, 0.13, 0])
+    time.sleep(2)
+    move_arm_in_table_frame(node, team_color, 'right', [0, 0.068, 0.76, 0.08, 0])
     set_pump(node, team_color, 'right', 1, 12)
     set_pump(node, team_color, 'right', 2, 12)
     set_pump(node, team_color, 'right', 3, 12)
     set_pump(node, team_color, 'right', 4, 12)
-    time.sleep(2)
+    time.sleep(1)
+    # move above
+    move_arm_in_table_frame(node, team_color, 'right', [0, 0.068, 0.88, 0.08, 0])
+    time.sleep(1)
     # grab blocks
     move_arm_in_table_frame(node, team_color, 'right', [0, 0.068, 0.88, 0.06, 0])
     time.sleep(1)
