@@ -183,12 +183,9 @@ def init_sequence(node):
     team_color = get_start_color(node)
     logging.info(team_color)
 
-    logging.debug('resetting to position: {}'.format(start_position[team_color]))
-    node.call("/position/reset", start_position[team_color])
-
-    while node.recv('/interface-panel/{}-pressed'.format(button_and_led_color[team_color])) is False:
-        pass
-
+    pos = [0.1025,0.129,-pi/2]
+    logging.debug('resetting to position: {}'.format(pos))
+    node.call("/position/reset", pos)
     node.call("/actuator/led_set", [button_and_led_color[team_color] + '_2', True])
 
     return team_color
@@ -238,121 +235,38 @@ def main():
     logging.info("start!")
 
     # evade goldorak
-    goto_waypoint(node, team_color, [0.66, 0.18, pi/2])
+    goto_waypoint(node, team_color, [0, 0.75, pi/2])
     time.sleep(2)
-    # position behind blocks
-    move_arm_in_body_frame(node, team_color, 'right', [0, 0.19, -0.06, 0.02, 0])
-    move_arm_in_body_frame(node, team_color, 'left', [0, 0.19, 0.06, 0.02, 0])
-    goto_waypoint(node, team_color, [0.9, 0.29, pi/2])
-    time.sleep(0.5)
-    # push blocks
-    goto_waypoint(node, team_color, [0.9, 1.0, pi/2])
-    time.sleep(0.5)
-    goto_waypoint(node, team_color, [0.9, 0.97, pi/2])
-    time.sleep(0.5)
-    goto_waypoint(node, team_color, [0.9, 0.94, pi/2])
-    move_arm_in_body_frame(node, team_color, 'right', [0, 0.19, -0.06, 0.15, 0])
-    move_arm_in_body_frame(node, team_color, 'left', [0, 0.19, 0.06, 0.15, 0])
-    # safe_arm_position(node)
-    time.sleep(1)
-    goto_waypoint(node, team_color, [0.9, 0.50, pi])
 
-
-    # close door 1
-    goto_waypoint(node, team_color, [0.4, 0.3, -pi])
-    set_waypoint(node, team_color, [0.23, 0.3, -pi])
-    time.sleep(2)
-    goto_waypoint(node, team_color, [0.4, 0.3, 0])
-
-    # close door 2
-    goto_waypoint(node, team_color, [0.4, 0.6, -pi])
-    set_waypoint(node, team_color, [0.23, 0.6, -pi])
-    time.sleep(2)
-    goto_waypoint(node, team_color, [0.4, 0.6, pi])
-
-    # get second block of elements
-    goto_waypoint(node, team_color, [0.35, 0.9, pi/2])
-    time.sleep(1)
-    # sweep off tower
-    move_arm_in_table_frame(node, team_color, 'left', [0, 0.068, 0.84, 0.14, 0])
+    # position arm
+    move_arm_in_table_frame(node, team_color, 'left', [0, -0.3, 0.75, 0.1, 0])
     set_pump(node, team_color, 'left', 1, 12)
     set_pump(node, team_color, 'left', 2, 12)
     set_pump(node, team_color, 'left', 3, 12)
     set_pump(node, team_color, 'left', 4, 12)
     time.sleep(2)
-    # move above
-    move_arm_in_table_frame(node, team_color, 'left', [0, 0.068, 0.88, 0.14, 0])
-    time.sleep(1)
-    # grab blocks
-    move_arm_in_table_frame(node, team_color, 'left', [0, 0.068, 0.88, 0.12, 0])
+    # descend
+    move_arm_in_table_frame(node, team_color, 'left', [0, -0.3, 0.75, 0.05, 0])
     time.sleep(1)
     # move up
-    move_arm_in_table_frame(node, team_color, 'left', [0, 0.068, 0.88, 0.21, 0])
-    time.sleep(1)
-    # move arm behind
-    move_arm_in_body_frame(node, team_color, 'left', [0, -.1, 0, 0.21, 0])
-    time.sleep(1)
+    move_arm_in_table_frame(node, team_color, 'left', [0, -0.3, 0.75, 0.15, 0])
+    time.sleep(0.5)
 
     # turn around
-    goto_waypoint(node, team_color, [0.35, 0.86, -pi/2])
+    goto_waypoint(node, team_color, [0, 0.75, -pi/2])
     time.sleep(1)
-    # do sweep movement to be sure
-    move_arm_in_table_frame(node, team_color, 'right', [0, 0.068, 0.76, 0.13, 0])
-    time.sleep(2)
-    move_arm_in_table_frame(node, team_color, 'right', [0, 0.068, 0.76, 0.08, 0])
-    set_pump(node, team_color, 'right', 1, 12)
-    set_pump(node, team_color, 'right', 2, 12)
-    set_pump(node, team_color, 'right', 3, 12)
-    set_pump(node, team_color, 'right', 4, 12)
-    time.sleep(1)
-    # move above
-    move_arm_in_table_frame(node, team_color, 'right', [0, 0.068, 0.88, 0.08, 0])
-    time.sleep(1)
-    # grab blocks
-    move_arm_in_table_frame(node, team_color, 'right', [0, 0.068, 0.88, 0.06, 0])
-    time.sleep(1)
-    # move up
-    move_arm_in_table_frame(node, team_color, 'right', [0, 0.068, 0.88, 0.21, 0])
-    time.sleep(1)
-    # move arm in front
-    move_arm_in_body_frame(node, team_color, 'right', [0, 0.18, -0.03, 0.21, 0])
-    time.sleep(1)
-
-    # drop right
-    goto_waypoint(node, team_color, [0.6, 1, pi/2])
-    move_arm_in_table_frame(node, team_color, 'right', [0, 0.85, 1, 0.21, 0])
-    time.sleep(1)
-    move_arm_in_table_frame(node, team_color, 'right', [0, 0.85, 1, 0.065, 0])
-    time.sleep(1)
-    set_pump(node, team_color, 'right', 1, -12)
-    set_pump(node, team_color, 'right', 2, -12)
-    set_pump(node, team_color, 'right', 3, -12)
-    set_pump(node, team_color, 'right', 4, -12)
-    time.sleep(1)
-    set_pump(node, team_color, 'right', 1, 0)
-    set_pump(node, team_color, 'right', 2, 0)
-    set_pump(node, team_color, 'right', 3, 0)
-    set_pump(node, team_color, 'right', 4, 0)
-    move_arm_in_body_frame(node, team_color, 'right', [0, 0.18, -0.03, 0.21, 0])
-    time.sleep(1)
-
-    # drop left
-    goto_waypoint(node, team_color, [0.6, 1, -pi/2])
-    move_arm_in_table_frame(node, team_color, 'left', [0, 0.85, 1, 0.21, 0])
-    time.sleep(1)
-    move_arm_in_table_frame(node, team_color, 'left', [0, 0.85, 1, 0.13, 0])
-    time.sleep(1)
-    set_pump(node, team_color, 'left', 1, -12)
-    set_pump(node, team_color, 'left', 2, -12)
-    set_pump(node, team_color, 'left', 3, -12)
-    set_pump(node, team_color, 'left', 4, -12)
-    time.sleep(1)
+    # drop element
     set_pump(node, team_color, 'left', 1, 0)
     set_pump(node, team_color, 'left', 2, 0)
     set_pump(node, team_color, 'left', 3, 0)
     set_pump(node, team_color, 'left', 4, 0)
-    move_arm_in_body_frame(node, team_color, 'left', [0, -.1, 0, 0.21, 0])
-    time.sleep(1)
+    time.sleep(0.5)
+    move_arm_in_body_frame(node, team_color, 'left', [0, 0.145, 0.04, 0.185, -pi/2])
+    move_arm_in_table_frame(node, team_color, 'right', [0, -0.3, 0.75, 0.1, 0])
+    time.sleep(2)
+    # place hand
+    move_arm_in_table_frame(node, team_color, 'right', [0, -0.3, 0.75, 0.01, 0])
+    time.sleep(2)
 
     # drop all elements
     time.sleep(10)
