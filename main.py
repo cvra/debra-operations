@@ -257,7 +257,7 @@ def main():
     logging.info("start!")
 
     # move aside box
-    follow_trajectory(node, team_color, [[0.5, 0.5, None], [0.5, 0.7, None], [0.4, 0.9, None], [0.3, 1.1, None]])
+    # follow_trajectory(node, team_color, [[0.7, 0.5, None], [0.6, 0.7, None], [0.4, 0.9, None], [0.3, 1.1, None]])
     goto_waypoint(node, team_color, [0.20, 1.17, pi])
     time.sleep(2)
 
@@ -279,11 +279,21 @@ def main():
     move_arm_in_body_frame(node, team_color, 'right', [0, -.19, -0.05, 0.21, pi/2])
     time.sleep(0.5)
 
-    # # move home
-    # goto_waypoint(node, team_color, [0.3, 0.5, pi])
+    # move home
+    goto_waypoint(node, team_color, [0.5, 0.5, pi])
+
+    # drop box
+    move_arm_in_body_frame(node, team_color, 'right', [0, 0, -0.30, 0.106, pi])
+    time.sleep(1)
+    set_pump(node, team_color, 'right', 1, 0)
+    set_pump(node, team_color, 'right', 2, 0)
+    set_pump(node, team_color, 'right', 3, 0)
+    set_pump(node, team_color, 'right', 4, 0)
+
+    time.sleep(0.5)
+    safe_arm_position(node)
 
     # drop all elements
-    time.sleep(10)
     set_pump(node, team_color, 'left', 1, 0)
     set_pump(node, team_color, 'left', 2, 0)
     set_pump(node, team_color, 'left', 3, 0)
