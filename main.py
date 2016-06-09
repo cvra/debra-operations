@@ -104,6 +104,28 @@ def goto_waypoint(node, team_color, pos):
     while not is_at_position(node, team_color, pos):
         pass
 
+def is_almost_at_position(node, team_color, target_pos, dist):
+    while True:
+        try:
+            node.recv('/position', timeout=0) # flush queue
+        except queue.Empty:
+            break
+    if team_color is 'green':
+        target_pos = flip_table_xytheta(target_pos)
+    current_pos = node.recv('/position')
+    if (np.linalg.norm(np.array(current_pos[:2]) - np.array(target_pos[:2])) > dist):
+        return False
+    else:
+        return True
+
+# [[x,y,theta], [x,y,theta], ...]
+# theta can be None
+def follow_trajectory(node, team_color, traj):
+    for pos in traj:
+        set_waypoint(node, team_color, pos)
+        while not is_almost_at_position(node, team_color, pos, 0.1):
+            pass
+
 
 def set_pump(node, team_color, arm, pump, voltage):
     left_pump_dir = {1: -1, 2: 1, 3: -1, 4: 1, 5: -1}
@@ -235,10 +257,9 @@ def main():
     logging.info("start!")
 
     # move aside box
+    follow_trajectory(node, team_color, [[0.5, 0.5, None], [0.5, 0.7, None], [0.4, 0.9, None], [0.3, 1.1, None]])
     goto_waypoint(node, team_color, [0.20, 1.17, pi])
     time.sleep(2)
-
-    # 20, 117, pi
 
     # position arm
     move_arm_in_table_frame(node, team_color, 'right', [0, 0.20, 1.47, 0.15, 0])
@@ -254,21 +275,13 @@ def main():
     move_arm_in_table_frame(node, team_color, 'right', [0, 0.20, 1.47, 0.19, 0])
     time.sleep(0.5)
 
-    # # turn around
-    # goto_waypoint(node, team_color, [0, 0.75, -pi/2])
-    # time.sleep(1)
-    # # drop element
-    # set_pump(node, team_color, 'left', 1, 0)
-    # set_pump(node, team_color, 'left', 2, 0)
-    # set_pump(node, team_color, 'left', 3, 0)
-    # set_pump(node, team_color, 'left', 4, 0)
+    # # todo: test safe arm position with box
+    # # move arm in front
+    # move_arm_in_body_frame(node, team_color, 'right', [0, .20, -0.5, 0.19, -pi/2])
     # time.sleep(0.5)
-    # move_arm_in_body_frame(node, team_color, 'left', [0, 0.145, 0.04, 0.185, -pi/2])
-    # move_arm_in_table_frame(node, team_color, 'right', [0, -0.3, 0.75, 0.1, 0])
-    # time.sleep(2)
-    # # place hand
-    # move_arm_in_table_frame(node, team_color, 'right', [0, -0.3, 0.75, 0.01, 0])
-    # time.sleep(2)
+
+    # # move home
+    # goto_waypoint(node, team_color, [0.3, 0.5, pi])
 
     # drop all elements
     time.sleep(10)
