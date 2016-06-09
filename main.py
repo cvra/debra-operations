@@ -234,39 +234,41 @@ def main():
     threading.Thread(target=kill_after_90_seconds, args=(node,)).start()
     logging.info("start!")
 
-    # evade goldorak
-    goto_waypoint(node, team_color, [0, 0.75, pi/2])
+    # move aside box
+    goto_waypoint(node, team_color, [0.20, 1.17, pi])
     time.sleep(2)
+
+    # 20, 117, pi
 
     # position arm
-    move_arm_in_table_frame(node, team_color, 'left', [0, -0.3, 0.75, 0.1, 0])
-    set_pump(node, team_color, 'left', 1, 12)
-    set_pump(node, team_color, 'left', 2, 12)
-    set_pump(node, team_color, 'left', 3, 12)
-    set_pump(node, team_color, 'left', 4, 12)
+    move_arm_in_table_frame(node, team_color, 'right', [0, 0.20, 1.47, 0.15, 0])
+    set_pump(node, team_color, 'right', 1, 12)
+    set_pump(node, team_color, 'right', 2, 12)
+    set_pump(node, team_color, 'right', 3, 12)
+    set_pump(node, team_color, 'right', 4, 12)
     time.sleep(2)
     # descend
-    move_arm_in_table_frame(node, team_color, 'left', [0, -0.3, 0.75, 0.05, 0])
+    move_arm_in_table_frame(node, team_color, 'right', [0, 0.20, 1.47, 0.106, 0])
     time.sleep(1)
     # move up
-    move_arm_in_table_frame(node, team_color, 'left', [0, -0.3, 0.75, 0.15, 0])
+    move_arm_in_table_frame(node, team_color, 'right', [0, 0.20, 1.47, 0.19, 0])
     time.sleep(0.5)
 
-    # turn around
-    goto_waypoint(node, team_color, [0, 0.75, -pi/2])
-    time.sleep(1)
-    # drop element
-    set_pump(node, team_color, 'left', 1, 0)
-    set_pump(node, team_color, 'left', 2, 0)
-    set_pump(node, team_color, 'left', 3, 0)
-    set_pump(node, team_color, 'left', 4, 0)
-    time.sleep(0.5)
-    move_arm_in_body_frame(node, team_color, 'left', [0, 0.145, 0.04, 0.185, -pi/2])
-    move_arm_in_table_frame(node, team_color, 'right', [0, -0.3, 0.75, 0.1, 0])
-    time.sleep(2)
-    # place hand
-    move_arm_in_table_frame(node, team_color, 'right', [0, -0.3, 0.75, 0.01, 0])
-    time.sleep(2)
+    # # turn around
+    # goto_waypoint(node, team_color, [0, 0.75, -pi/2])
+    # time.sleep(1)
+    # # drop element
+    # set_pump(node, team_color, 'left', 1, 0)
+    # set_pump(node, team_color, 'left', 2, 0)
+    # set_pump(node, team_color, 'left', 3, 0)
+    # set_pump(node, team_color, 'left', 4, 0)
+    # time.sleep(0.5)
+    # move_arm_in_body_frame(node, team_color, 'left', [0, 0.145, 0.04, 0.185, -pi/2])
+    # move_arm_in_table_frame(node, team_color, 'right', [0, -0.3, 0.75, 0.1, 0])
+    # time.sleep(2)
+    # # place hand
+    # move_arm_in_table_frame(node, team_color, 'right', [0, -0.3, 0.75, 0.01, 0])
+    # time.sleep(2)
 
     # drop all elements
     time.sleep(10)
