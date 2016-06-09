@@ -275,10 +275,9 @@ def main():
     move_arm_in_table_frame(node, team_color, 'right', [0, 0.20, 1.47, 0.19, 0])
     time.sleep(0.5)
 
-    # # todo: test safe arm position with box
-    # # move arm in front
-    # move_arm_in_body_frame(node, team_color, 'right', [0, .20, -0.5, 0.19, -pi/2])
-    # time.sleep(0.5)
+    # move arm with box behind
+    move_arm_in_body_frame(node, team_color, 'right', [0, -.19, -0.05, 0.21, pi/2])
+    time.sleep(0.5)
 
     # # move home
     # goto_waypoint(node, team_color, [0.3, 0.5, pi])
