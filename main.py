@@ -265,6 +265,7 @@ def main():
     set_pump(node, team_color, 'right', 3, 12)
     set_pump(node, team_color, 'right', 4, 12)
     move_arm_in_body_frame(node, team_color, 'left', [0, 0.16, 0.10, 0.19, 0])
+    time.sleep(0.5)
     move_arm_in_table_frame(node, team_color, 'right', [0, 0.20, 1.47, 0.19, 0])
     time.sleep(2)
     # descend
@@ -283,7 +284,7 @@ def main():
 
     # drop box
     move_arm_in_body_frame(node, team_color, 'right', [0, 0, -0.30, 0.106, pi])
-    time.sleep(1)
+    time.sleep(1.3)
     set_pump(node, team_color, 'right', 1, 0)
     set_pump(node, team_color, 'right', 2, 0)
     set_pump(node, team_color, 'right', 3, 0)
